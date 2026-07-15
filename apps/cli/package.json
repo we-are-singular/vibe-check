@@ -1,6 +1,6 @@
 {
   "name": "@we-are-singular/vibe-check",
-  "version": "0.0.0",
+  "version": "0.0.1",
   "description": "Review static HTML and Markdown alternatives in a local browser-based voting session.",
   "keywords": [
     "cli",
