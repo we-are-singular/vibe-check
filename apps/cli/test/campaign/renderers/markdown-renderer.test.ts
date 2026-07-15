@@ -39,6 +39,23 @@ describe("MarkdownRenderer", () => {
     expect(rendered.label).toBe("design-notes")
   })
 
+  it("parses frontmatter, uses its name as the fallback label, and excludes it from prose", async () => {
+    const rendered = await renderMarkdown(
+      "skill.md",
+      "---\nname: Vibe Check\ndescription: Gather feedback\ntags:\n  - agent\n  - review\n---\n\nMarkdown body."
+    )
+
+    expect(rendered.label).toBe("Vibe Check")
+    if (rendered.preview.kind !== "markdown") throw new Error("Expected a Markdown preview.")
+    expect(rendered.preview.metadata).toEqual({
+      name: "Vibe Check",
+      description: "Gather feedback",
+      tags: ["agent", "review"],
+    })
+    expect(rendered.preview.content).toContain("<p>Markdown body.</p>")
+    expect(rendered.preview.content).not.toContain("description: Gather feedback")
+  })
+
   it("renders reference links", async () => {
     const rendered = await renderMarkdown(
       "references.md",

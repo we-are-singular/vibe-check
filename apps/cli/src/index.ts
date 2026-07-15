@@ -1,5 +1,6 @@
 import { Builtins, Cli, type BaseContext } from "clipanion"
 import packageJson from "../package.json" with { type: "json" }
+import { formatWelcomeScreen } from "./cli-welcome.js"
 import { ServeCommand } from "./commands/serve.command.js"
 import { SkillCommand } from "./commands/skill.command.js"
 
@@ -12,16 +13,12 @@ class VibeCheckCli<Context extends BaseContext> extends Cli<Context> {
     const usage = super.usage(command, options).replace(/ #\d+/g, "")
     if (command !== undefined) return usage
 
-    return [
-      "Review direct-child HTML and Markdown candidates with in-memory local voting.",
-      "",
-      usage,
-      "",
-      "Quick start",
-      "  vibe-check serve ./candidate-variants",
-      "",
-      "Use `vibe-check serve --help` for options, public tunnel guidance, and more examples.",
-    ].join("\n")
+    return formatWelcomeScreen({
+      bannerPreference: process.env.VIBE_CHECK_BANNER,
+      columns: process.stdout.columns,
+      isTTY: process.stdout.isTTY,
+      rows: process.stdout.rows,
+    })
   }
 
   error(error: Error, options?: Parameters<Cli<Context>["error"]>[1]): string {

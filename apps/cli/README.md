@@ -1,10 +1,10 @@
 # Vibe Check
 
-Review static HTML and Markdown alternatives in a local browser-based voting session.
+Share feedback on static HTML and Markdown alternatives with an agent, a teammate, or a wider group.
 
 ## Install
 
-Requires Node.js 22 or newer.
+Vibe Check runs through npm on Windows, macOS, and Linux. Requires Node.js 22 or newer.
 
 ```bash
 npm install -g @we-are-singular/vibe-check
@@ -29,9 +29,9 @@ Start a review session:
 vibe-check serve ./candidate-variants
 ```
 
-Open the local URL printed by the command. Review each candidate and choose **Pass**, **Keep**, or **Love**. After you vote on every candidate, Vibe Check shows ranked results for the session.
+Open the printed review URL. It starts on your machine and can be shared with `--tunnel`. Review each candidate and give feedback with **Pass**, **Keep**, or **Love**. After you respond to every candidate, Vibe Check shows the session results.
 
-Votes exist only in memory. Press `Ctrl+C` to stop the server; Vibe Check prints aggregate results and discards all votes.
+Feedback is scoped to the running session and stays in memory until the server stops. Press `Ctrl+C` when the review is over; Vibe Check prints the session summary but does not persist the session data.
 
 ## Campaign files
 
@@ -48,6 +48,12 @@ Use another loopback port when `4173` is unavailable:
 vibe-check serve ./candidate-variants --port 4214
 ```
 
+Emit newline-delimited JSON lifecycle events for automation:
+
+```bash
+vibe-check serve ./candidate-variants --json
+```
+
 Share a temporary public review link through an installed tunnel provider:
 
 ```bash
@@ -55,23 +61,27 @@ vibe-check serve ./candidate-variants --tunnel cloudflare
 vibe-check serve ./candidate-variants --tunnel ngrok
 ```
 
-The corresponding provider executable must be installed and configured before using `--tunnel`. Anyone with a public link can open the session and submit votes. Vibe Check does not ask voters to identify themselves, but a tunnel provider, browser, or network may still process connection metadata. Stop the process to close the link and discard its votes.
+The corresponding provider executable must be installed and configured before using `--tunnel`. Anyone with a public link can participate in the session. Vibe Check does not ask participants to identify themselves, but a tunnel provider, browser, or network may still process connection metadata. Stop the process to close the link; the running session ends with the process.
 
 ## Agent skill
 
-Vibe Check ships an agent skill for AI-assisted campaign reviews.
+Run the built-in guide to understand Vibe Check's workflow:
 
 ```bash
 vibe-check skill
 ```
 
-To install it with the Skills CLI, let Vibe Check ask for confirmation before it runs:
+Install the skill directly with the Skills CLI:
+
+```bash
+npx skills add we-are-singular/vibe-check --skill vibe-check
+```
+
+Or print it first and confirm the installation from Vibe Check:
 
 ```bash
 vibe-check skill --install
 ```
-
-The installer runs `npx skills add we-are-singular/vibe-check --skill vibe-check` only after you confirm.
 
 ## Help
 

@@ -24,8 +24,16 @@ type MarkdownItFactory = (
   }
 ) => MarkdownIt
 
+type Frontmatter = {
+  readonly content: string
+  readonly data: Record<string, unknown>
+}
+
+type FrontmatterParser = (source: string) => Frontmatter
+
 const loadModule = createRequire(import.meta.url)
 const createMarkdownIt = loadModule("markdown-it") as MarkdownItFactory
+const parseFrontmatter = loadModule("gray-matter") as FrontmatterParser
 const markdown = createMarkdownIt("commonmark", {
   html: false,
   linkify: false,
@@ -42,12 +50,17 @@ export class MarkdownRenderer implements VibeRenderer {
     if (markdownSource.trim().length === 0) {
       throw new Error(`${source.relativePath} is empty`)
     }
+    const frontmatter = parseFrontmatter(markdownSource)
 
     return {
-      label: extractFirstHeading(markdown.parse(markdownSource, {})) ?? labelFromFilename(source.relativePath),
+      label:
+        extractFirstHeading(markdown.parse(frontmatter.content, {})) ??
+        extractFrontmatterLabel(frontmatter.data) ??
+        labelFromFilename(source.relativePath),
       preview: {
-        content: markdown.render(markdownSource),
+        content: markdown.render(frontmatter.content),
         kind: "markdown",
+        metadata: frontmatter.data,
       },
     }
   }
@@ -70,4 +83,13 @@ function extractFirstHeading(tokens: readonly MarkdownToken[]): string | null {
     .trim()
 
   return text && text.length > 0 ? text : null
+}
+
+function extractFrontmatterLabel(metadata: Record<string, unknown>): string | null {
+  for (const key of ["title", "name"]) {
+    const value = metadata[key]
+    if (typeof value === "string" && value.trim().length > 0) return value.trim()
+  }
+
+  return null
 }

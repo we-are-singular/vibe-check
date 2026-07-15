@@ -1,6 +1,7 @@
 @import "tailwindcss";
 @plugin "@tailwindcss/typography";
 @source "../../campaign/renderers/markdown-renderer.ts";
+@source "../../campaign/renderers/preview-document.tsx";
 
 @theme {
   --font-sans: ui-rounded, "Avenir Next", "Segoe UI", sans-serif;

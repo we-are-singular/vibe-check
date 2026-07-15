@@ -49,21 +49,21 @@ When tuning a design, vary the intended dimension deliberately—such as density
 
 Represent each option as one candidate file. Ask reviewers to complete the full review before discussing results. Vibe Check reports a session summary, not reviewer identities; use it for directional feedback rather than a binding, attributable, or security-sensitive decision.
 
-## Run a local review
+## Run a feedback session
 
 ```bash
 vibe-check serve ./candidate-variants
 ```
 
-Open the printed loopback URL in a browser. Each browser session reviews one candidate at a time and provides feedback for each. Results appear after that session has reviewed every candidate.
+Open the printed review URL in a browser. Each browser session reviews one candidate at a time and provides feedback for each. Results appear after that session has reviewed every candidate.
 
-Feedback exists only in memory. Press `Ctrl+C` to stop Vibe Check, print the session summary, and discard all feedback.
+Feedback is scoped to the running session and remains in memory until Vibe Check stops. Press `Ctrl+C` to print the session summary; the session data is not persisted.
 
 ## Review flow
 
 1. State the decision question before asking for feedback.
 2. Ensure every candidate addresses the same question.
-3. Open the local URL and review every option.
+3. Open the printed review URL and review every option.
 4. Use the session output alongside qualitative feedback and constraints.
 5. Stop the process when the session ends; its feedback cannot be recovered.
 
@@ -75,7 +75,7 @@ vibe-check serve ./candidate-variants --port 4214
 
 ## Public feedback through a proxy
 
-`--tunnel` starts a temporary reverse proxy from a public URL to the local review server. It is convenience for remote feedback, not access control or anonymity.
+`--tunnel` starts a temporary reverse proxy from a public URL to the review server on your machine. It is a convenience for remote feedback, not access control or anonymity.
 
 ### Cloudflare Quick Tunnel
 
@@ -99,7 +99,7 @@ ngrok config add-authtoken <token>
 
 Vibe Check runs `ngrok http <local-url>` and prints the temporary public URL.
 
-Anyone with either public link can open the session and provide feedback. Vibe Check does not request a reviewer identity, but proxy providers and networks can still process connection metadata. Do not tunnel confidential candidate material. Stop the process to close the link and discard its feedback.
+Anyone with either public link can open the session and provide feedback. Vibe Check does not request a reviewer identity, but proxy providers and networks can still process connection metadata. Do not tunnel confidential candidate material. Stop the process to close the link; the running session ends with the process.
 
 ## Inspect command options
 

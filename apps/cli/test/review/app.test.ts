@@ -26,6 +26,7 @@ function createTestApp(viewerAssetsOverride?: ViewerAssetSource) {
         preview: {
           content: "<h1>Markdown candidate</h1><p>Safe prose.</p>",
           kind: "markdown",
+          metadata: {},
         },
       },
     ],

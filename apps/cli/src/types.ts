@@ -1,4 +1,6 @@
 /** Shared models exchanged between campaign loading, review storage, and the viewer. */
+export type MarkdownMetadata = Readonly<Record<string, unknown>>
+
 export type VibePreview =
   | {
       content: string
@@ -7,6 +9,7 @@ export type VibePreview =
   | {
       content: string
       kind: "markdown"
+      metadata: MarkdownMetadata
     }
 
 export type VibeSource = {

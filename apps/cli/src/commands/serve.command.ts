@@ -13,10 +13,15 @@ export class ServeCommand extends VibeCheckCommand {
   static paths = [["serve"]]
 
   static usage = Command.Usage({
-    description: "Serve a folder of self-contained HTML or Markdown vibes for local voting",
+    description: "Serve self-contained HTML or Markdown files for shared feedback",
     details:
-      "Loads direct-child HTML and Markdown files, renders one sandboxed candidate at a time, and keeps votes only while this process runs.",
-    examples: [["Review a candidate folder", "vibe-check serve ./candidate-variants"]],
+      "Requires two or more direct-child `.html`, `.md`, or `.markdown` candidates; HTML and Markdown may be mixed, files are reviewed in lexical filename order, and HTML must be self-contained. Starts a review URL on your machine; `--tunnel` shares it. Markdown frontmatter renders as metadata. Feedback exists only while this process runs. Cloudflare requires `cloudflared`; ngrok requires an installed, authenticated ngrok client.",
+    examples: [
+      ["Start a feedback session", "vibe-check serve ./candidate-variants"],
+      ["Use another port", "vibe-check serve ./candidate-variants --port 4214"],
+      ["Emit JSON lifecycle events", "vibe-check serve ./candidate-variants --json"],
+      ["Share through Cloudflare", "vibe-check serve ./candidate-variants --tunnel cloudflare"],
+    ],
   })
 
   directory = Option.String()
@@ -27,7 +32,7 @@ export class ServeCommand extends VibeCheckCommand {
   })
 
   tunnel = Option.String("--tunnel", {
-    description: `Temporary public tunnel provider (${TUNNEL_PROVIDERS.join(", ")})`,
+    description: `Temporary public tunnel provider (${TUNNEL_PROVIDERS.join(", ")}; see details for prerequisites)`,
     required: false,
   })
 
@@ -74,8 +79,8 @@ export class ServeCommand extends VibeCheckCommand {
         },
         hint:
           activeTunnel === undefined
-            ? "Press Ctrl+C to stop. Votes are stored only in memory and will be discarded."
-            : `Public anonymous voting is active through ${tunnelProvider}: anyone with the public URL can vote. Press Ctrl+C to stop.`,
+            ? "Review is ready. Press Ctrl+C to stop; feedback is kept only for this running session."
+            : `Shared feedback is available through ${tunnelProvider}: anyone with the public URL can participate. Press Ctrl+C to stop.`,
         urls: {
           apiResults: `${reviewUrl}/api/results?sessionId=<session-id>`,
           public: activeTunnel?.publicUrl,
@@ -99,8 +104,8 @@ export class ServeCommand extends VibeCheckCommand {
         type: "stopped",
         hint:
           tunnelProvider === undefined
-            ? "Vibe Check stopped. In-memory votes were discarded."
-            : `${tunnelProvider} tunnel closed. Vibe Check stopped. In-memory votes were discarded.`,
+            ? "Vibe Check stopped. The session is no longer available."
+            : `${tunnelProvider} tunnel closed. Vibe Check stopped. The session is no longer available.`,
         results: voteStore.results(),
       })
       return 0

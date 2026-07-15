@@ -1,7 +1,7 @@
 {
   "name": "@we-are-singular/vibe-check",
   "version": "0.0.2",
-  "description": "Review static HTML and Markdown alternatives in a local browser-based voting session.",
+  "description": "Share feedback on static HTML and Markdown alternatives with an agent, team, or wider group.",
   "keywords": [
     "cli",
     "creative-review",
@@ -43,6 +43,7 @@
   "dependencies": {
     "@hono/node-server": "^2.0.9",
     "clipanion": "^3.2.1",
+    "gray-matter": "^4.0.3",
     "hono": "^4.12.30",
     "lucide-react": "^1.24.0",
     "markdown-it": "^14.3.0",
