@@ -11,7 +11,7 @@ type MarkdownToken = {
 }
 
 type MarkdownIt = {
-  parse(source: string): readonly MarkdownToken[]
+  parse(source: string, environment: Record<string, unknown>): readonly MarkdownToken[]
   render(source: string): string
 }
 
@@ -44,7 +44,7 @@ export class MarkdownRenderer implements VibeRenderer {
     }
 
     return {
-      label: extractFirstHeading(markdown.parse(markdownSource)) ?? labelFromFilename(source.relativePath),
+      label: extractFirstHeading(markdown.parse(markdownSource, {})) ?? labelFromFilename(source.relativePath),
       preview: {
         content: markdown.render(markdownSource),
         kind: "markdown",

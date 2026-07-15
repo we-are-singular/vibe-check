@@ -39,6 +39,16 @@ describe("MarkdownRenderer", () => {
     expect(rendered.label).toBe("design-notes")
   })
 
+  it("renders reference links", async () => {
+    const rendered = await renderMarkdown(
+      "references.md",
+      "# References\n\n[Vibe Check][docs]\n\n[docs]: https://example.com"
+    )
+
+    if (rendered.preview.kind !== "markdown") throw new Error("Expected a Markdown preview.")
+    expect(rendered.preview.content).toContain('<a href="https://example.com">Vibe Check</a>')
+  })
+
   it("escapes raw script HTML rather than emitting executable markup", async () => {
     const rendered = await renderMarkdown("safe.md", "# Safe\n\n<script>window.pwned = true</script>")
 
