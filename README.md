@@ -7,8 +7,10 @@ Review static HTML and Markdown alternatives in a local browser-based voting ses
 Requires Node.js 22 or newer.
 
 ```bash
-npm install -g vibe-check
+npm install -g @we-are-singular/vibe-check
 ```
+
+The package scope identifies its publisher. The installed command remains `vibe-check`.
 
 ## Quick start
 

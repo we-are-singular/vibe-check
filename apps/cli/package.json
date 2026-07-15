@@ -1,5 +1,5 @@
 {
-  "name": "vibe-check",
+  "name": "@we-are-singular/vibe-check",
   "version": "0.0.0",
   "description": "Review static HTML and Markdown alternatives in a local browser-based voting session.",
   "keywords": [
@@ -27,6 +27,9 @@
     "skills/"
   ],
   "type": "module",
+  "publishConfig": {
+    "access": "public"
+  },
   "scripts": {
     "build": "vite build && npm run build:viewer && chmod +x dist/index.js",
     "build:viewer": "vite build --config vite.viewer.config.ts",

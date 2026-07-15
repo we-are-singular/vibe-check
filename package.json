@@ -7,17 +7,17 @@
   ],
   "type": "module",
   "scripts": {
-    "build": "npm run build --workspace=vibe-check",
+    "build": "npm run build --workspace=@we-are-singular/vibe-check",
     "check": "npm run typecheck && npm run lint && npm test && npm run build",
-    "dev": "npm run dev --workspace=vibe-check",
+    "dev": "npm run dev --workspace=@we-are-singular/vibe-check",
     "format": "oxfmt --check .",
     "format:fix": "oxfmt .",
     "lint": "oxlint",
     "lint:fix": "oxlint --fix",
     "prepare": "husky",
-    "release": "npm run release --workspace=vibe-check",
-    "test": "npm run test --workspace=vibe-check",
-    "typecheck": "npm run typecheck --workspace=vibe-check"
+    "release": "npm run release --workspace=@we-are-singular/vibe-check",
+    "test": "npm run test --workspace=@we-are-singular/vibe-check",
+    "typecheck": "npm run typecheck --workspace=@we-are-singular/vibe-check"
   },
   "devDependencies": {
     "@commitlint/cli": "^21.2.1",
