@@ -1,0 +1,35 @@
+{
+  "name": "vibe-check",
+  "private": true,
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "type": "module",
+  "scripts": {
+    "build": "npm run build --workspace=vibe-check",
+    "check": "npm run typecheck && npm run lint && npm test && npm run build",
+    "dev": "npm run dev --workspace=vibe-check",
+    "format": "oxfmt --check .",
+    "format:fix": "oxfmt .",
+    "lint": "oxlint",
+    "lint:fix": "oxlint --fix",
+    "prepare": "husky",
+    "release": "npm run release --workspace=vibe-check",
+    "test": "npm run test --workspace=vibe-check",
+    "typecheck": "npm run typecheck --workspace=vibe-check"
+  },
+  "devDependencies": {
+    "@commitlint/cli": "^21.2.1",
+    "@commitlint/config-conventional": "^21.2.0",
+    "husky": "^9.1.7",
+    "lint-staged": "^17.0.8",
+    "oxfmt": "^0.59.0",
+    "oxlint": "^1.74.0"
+  },
+  "engines": {
+    "node": ">=22.0.0",
+    "npm": ">=11.0.0"
+  },
+  "packageManager": "npm@11.18.0"
+}

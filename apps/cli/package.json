@@ -1,0 +1,82 @@
+{
+  "name": "vibe-check",
+  "version": "0.0.0",
+  "description": "Review static HTML and Markdown alternatives in a local browser-based voting session.",
+  "keywords": [
+    "cli",
+    "creative-review",
+    "design-review",
+    "html",
+    "markdown"
+  ],
+  "homepage": "https://github.com/we-are-singular/vibe-check#readme",
+  "bugs": {
+    "url": "https://github.com/we-are-singular/vibe-check/issues"
+  },
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/we-are-singular/vibe-check.git"
+  },
+  "bin": {
+    "vibe-check": "./dist/index.js"
+  },
+  "files": [
+    "dist/index.js",
+    "dist/viewer/",
+    "skills/"
+  ],
+  "type": "module",
+  "scripts": {
+    "build": "vite build && npm run build:viewer && chmod +x dist/index.js",
+    "build:viewer": "vite build --config vite.viewer.config.ts",
+    "dev": "npm run build:viewer && concurrently -P --kill-others-on-fail --names viewer,cli \"npm run dev:viewer\" \"npm run dev:cli -- {@}\" --",
+    "dev:cli": "tsx watch src/index.ts",
+    "dev:viewer": "vite build --config vite.viewer.config.ts --watch",
+    "release": "release-it",
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@hono/node-server": "^2.0.9",
+    "clipanion": "^3.2.1",
+    "hono": "^4.12.30",
+    "lucide-react": "^1.24.0",
+    "markdown-it": "^14.3.0",
+    "react": "^19.2.7",
+    "react-dom": "^19.2.7"
+  },
+  "devDependencies": {
+    "@tailwindcss/typography": "^0.5.20",
+    "@tailwindcss/vite": "^4.3.2",
+    "@testing-library/react": "^16.3.2",
+    "@testing-library/user-event": "^14.6.1",
+    "@types/markdown-it": "^14.1.2",
+    "@types/node": "^26.0.0",
+    "@types/react": "^19.2.17",
+    "@types/react-dom": "^19.2.3",
+    "@vitejs/plugin-react": "^6.0.3",
+    "concurrently": "^10.0.3",
+    "jsdom": "^29.1.1",
+    "release-it": "^20.2.1",
+    "tailwindcss": "^4.3.2",
+    "tsx": "^4.21.0",
+    "typescript": "^5.9.3",
+    "vite": "^8.0.0",
+    "vitest": "^4.1.10"
+  },
+  "engines": {
+    "node": ">=22.0.0",
+    "npm": ">=11.0.0"
+  },
+  "release-it": {
+    "$schema": "https://unpkg.com/release-it@20/schema/release-it.json",
+    "git": {
+      "commitMessage": "chore(release): v${version}",
+      "tagName": "v${version}"
+    },
+    "hooks": {
+      "before:init": "npm run typecheck && npm test && npm run build && npm pack --dry-run --json"
+    }
+  }
+}

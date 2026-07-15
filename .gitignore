@@ -1,0 +1,28 @@
+# Dependencies and package-manager artifacts
+node_modules/
+.pnp
+.pnp.js
+
+
+# Docs and Work files
+PRD.md
+PLAN.md
+
+# Build and test output
+apps/*/dist/
+*.tsbuildinfo
+coverage/
+test-results/
+
+# Editor and operating-system files
+.vscode/*
+!.vscode/extensions.json
+.idea/
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+pnpm-debug.log*
