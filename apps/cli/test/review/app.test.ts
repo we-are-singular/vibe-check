@@ -10,7 +10,7 @@ import type { VotingSystem } from "../../src/types.js"
 function createTestApp(votingSystem: VotingSystem = "tinder", viewerAssetsOverride?: ViewerAssetSource) {
   const campaign = {
     directory: "/campaign",
-    title: "Campaign",
+    title: "Which draft should we ship?",
     vibes: [
       {
         file: "plain.html",
@@ -76,7 +76,7 @@ describe("createReviewApp", () => {
 
     const campaign = await app.request("/api/campaign")
     await expect(campaign.json()).resolves.toMatchObject({
-      title: "Campaign",
+      title: "Which draft should we ship?",
       vibes: [{ kind: "html" }, { kind: "markdown" }],
       votingSystem: "tinder",
     })

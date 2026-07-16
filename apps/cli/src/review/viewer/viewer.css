@@ -108,8 +108,8 @@
   }
 
   .header-queue .queue-button,
+  .github-link,
   .help-button {
-    display: inline-flex;
     width: 2.25rem;
     min-height: 2.25rem;
     align-items: center;
@@ -123,11 +123,13 @@
   }
 
   .header-queue .queue-button:not(:disabled):hover,
+  .github-link:hover,
   .help-button:hover {
     background: var(--color-pass-surface);
   }
 
   .header-queue .queue-button:focus-visible,
+  .github-link:focus-visible,
   .help-button:focus-visible {
     outline: 3px solid var(--color-focus);
     outline-offset: 2px;

@@ -75,6 +75,16 @@ function getBottomQueueButton(name: "Finish review" | "Next Vibe" | "Previous Vi
   return button
 }
 
+function getHeaderGithubLink(): HTMLElement {
+  const link = within(screen.getByRole("banner")).getByRole("link", { name: "Open Vibe Check on GitHub" })
+
+  expect(link.getAttribute("href")).toBe("https://github.com/we-are-singular/vibe-check")
+  expect(link.getAttribute("target")).toBe("_blank")
+  expect(link.getAttribute("rel")).toBe("noopener noreferrer")
+
+  return link
+}
+
 describe("ViewerApp", () => {
   afterEach(() => {
     cleanup()
@@ -93,6 +103,7 @@ describe("ViewerApp", () => {
     expect(screen.getByRole("link", { name: "Star Vibe Check on GitHub" }).getAttribute("href")).toBe(
       "https://github.com/we-are-singular/vibe-check"
     )
+    getHeaderGithubLink()
   })
   it("advances after a Tinder verdict and preserves a revised opinion when returning", async () => {
     const api = new FakeReviewApiClient(tinderCampaign)
@@ -100,6 +111,7 @@ describe("ViewerApp", () => {
 
     render(<ViewerApp api={api} />)
 
+    getHeaderGithubLink()
     await screen.findByTitle("Aurora")
     await user.click(screen.getByRole("button", { name: "Pass this Vibe" }))
     await screen.findByTitle("Beacon")
@@ -124,24 +136,29 @@ describe("ViewerApp", () => {
     expect(screen.getByRole("link", { name: "Star Vibe Check on GitHub" }).getAttribute("href")).toBe(
       "https://github.com/we-are-singular/vibe-check"
     )
+    getHeaderGithubLink()
 
     cleanup()
     render(<ViewerApp api={api} />)
 
     const header = screen.getByRole("banner")
     const reviewResponses = await within(header).findByRole("button", { name: "Review my responses" })
+    const githubLink = getHeaderGithubLink()
+    const helpButton = within(header).getByRole("button", { name: "How this review works" })
     const thankYouCard = screen.getByText("Keep the good vibes moving").closest("section")
     if (!thankYouCard) throw new Error("Missing thank-you card.")
 
     expect(reviewResponses).not.toBeNull()
-    expect(within(header).getByRole("button", { name: "How this review works" })).not.toBeNull()
+    expect(helpButton).not.toBeNull()
+    expect(reviewResponses.compareDocumentPosition(githubLink) & Node.DOCUMENT_POSITION_FOLLOWING).not.toBe(0)
+    expect(githubLink.compareDocumentPosition(helpButton) & Node.DOCUMENT_POSITION_FOLLOWING).not.toBe(0)
     expect(within(header).queryByRole("button", { name: "Previous Vibe" })).toBeNull()
     expect(within(header).queryByRole("button", { name: "Next Vibe" })).toBeNull()
     expect(within(header).queryByRole("button", { name: "Finish review" })).toBeNull()
     expect(within(thankYouCard).queryByRole("button", { name: "Review my responses" })).toBeNull()
 
     await user.click(reviewResponses)
-    await screen.findByTitle("Beacon")
+    await screen.findByTitle("Aurora")
   })
 
   it("auto-advances after a star rating and keeps its cumulative highlight when returning", async () => {

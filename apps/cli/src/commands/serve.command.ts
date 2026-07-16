@@ -37,10 +37,15 @@ export class ServeCommand extends VibeCheckCommand {
       ["Write JSON Lines lifecycle output", "vibe-check serve ./candidate-variants --json --output results.jsonl"],
       ["Write human-readable lifecycle output", "vibe-check serve ./candidate-variants --output results.txt"],
       ["Share through Cloudflare", "vibe-check serve ./candidate-variants --tunnel cloudflare"],
+      ["Ask a named review question", 'vibe-check serve ./candidate-variants --name "Which landing page is clearest?"'],
     ],
   })
 
   directory = Option.String()
+  name = Option.String("--name,-n", {
+    description: "Campaign title or review question (max 255 characters; default: vibe-check)",
+    required: false,
+  })
 
   port = Option.String("--port,-p", {
     description: "Loopback port (1-65535, default: 4173)",
@@ -103,9 +108,18 @@ export class ServeCommand extends VibeCheckCommand {
         await this.output({ type: "error", message: `--voting must be one of: ${VOTING_SYSTEM_VALUES.join(", ")}.` })
         return 1
       }
+      const campaignTitle = parseCampaignTitle(this.name)
+      if (campaignTitle === null) {
+        await this.output({
+          type: "error",
+          message: "--name must be a nonblank title or question of at most 255 characters.",
+        })
+        return 1
+      }
 
       const campaign = await new CampaignLoader([new HtmlFragmentRenderer(), new MarkdownRenderer()]).load(
-        this.directory
+        this.directory,
+        campaignTitle
       )
       const feedbackStore = new InMemoryFeedbackStore(campaign.vibes, {
         recordAcceptedFeedback: feedback => {
@@ -184,4 +198,12 @@ function parsePort(value: string): number | null {
 
   const port = Number(value)
   return Number.isSafeInteger(port) && port <= 65_535 ? port : null
+}
+
+/** Normalizes the optional campaign title at the CLI boundary before loading files. */
+export function parseCampaignTitle(value: string | undefined): string | null {
+  if (value === undefined) return "vibe-check"
+
+  const title = value.trim()
+  return title.length === 0 || title.length > 255 ? null : title
 }

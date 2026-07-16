@@ -99,6 +99,7 @@ function formatTextOutput(event: CommandOutput): string {
       return (
         [
           `Loaded ${event.campaign.vibeCount} vibes from ${event.campaign.directory}.`,
+          `Campaign: ${event.campaign.title}`,
           "",
           `Review:  ${event.urls.review}`,
           `Thanks:  ${event.urls.thankYou}`,

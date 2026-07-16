@@ -170,8 +170,7 @@ export function ViewerApp({ api = defaultApi }: ViewerAppProps): React.JSX.Eleme
     if (viewerState.kind !== "complete") return
 
     const { campaign, session } = viewerState
-    const firstIncompleteIndex = campaign.vibes.findIndex(vibe => session.feedback[vibe.id] === undefined)
-    setCurrentIndex(firstIncompleteIndex === -1 ? campaign.vibes.length - 1 : firstIncompleteIndex)
+    setCurrentIndex(0)
     setSaveError(undefined)
     setViewerState({ campaign, kind: "reviewing", session })
   }
@@ -249,6 +248,17 @@ export function ViewerApp({ api = defaultApi }: ViewerAppProps): React.JSX.Eleme
           {isReviewing && activeVibe?.kind === "html" && (
             <PreviewModePicker onChange={changePreviewMode} value={previewMode} />
           )}
+          <a
+            aria-label="Open Vibe Check on GitHub"
+            className="github-link"
+            href="https://github.com/we-are-singular/vibe-check"
+            rel="noopener noreferrer"
+            target="_blank"
+          >
+            <svg aria-hidden="true" className="size-5" fill="currentColor" viewBox="0 0 24 24">
+              <path d="M12 .297C5.373.297 0 5.67 0 12.297c0 5.303 3.438 9.8 8.205 11.387.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.73.083-.73 1.205.085 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.108-.775.418-1.305.762-1.605-2.665-.3-5.467-1.332-5.467-5.93 0-1.31.467-2.38 1.235-3.22-.123-.303-.535-1.523.117-3.176 0 0 1.008-.322 3.3 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.29-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.873.12 3.176.77.84 1.232 1.91 1.232 3.22 0 4.61-2.807 5.625-5.48 5.92.43.37.823 1.096.823 2.21 0 1.596-.014 2.884-.014 3.276 0 .32.216.694.825.576C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12" />
+            </svg>
+          </a>
           {votingSystem && (
             <button
               aria-label="How this review works"

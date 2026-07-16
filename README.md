@@ -31,7 +31,7 @@ vibe-check serve ./candidate-variants
 
 Open the printed review URL. It starts on your machine and can be shared with `--tunnel`. The default `tinder` mechanic offers **Pass**, **Keep**, and **Love**; selecting one advances to the next candidate. Use the icon-only **Previous** and **Next** controls to revisit candidates; previously recorded feedback stays selected and can be changed. Reaching the end shows a thank-you screen; the Campaign owner receives aggregate feedback in the final CLI session summary.
 
-Feedback is scoped to the running session and stays in memory until the server stops. Completed sessions reopen on their thank-you screen; **Review my responses** appears in the top-right header next to the help button and reopens the last candidate. Stop gracefully with `Ctrl+C` (SIGINT) or SIGTERM: Vibe Check writes the final summary and exits with status `0`. A forced termination such as SIGKILL cannot write that shutdown summary, but accepted feedback already emitted to an output capture remains available. Without `--output` or caller output capture, Vibe Check does not persist session data to a file.
+Feedback is scoped to the running session and stays in memory until the server stops. Completed sessions reopen on their thank-you screen; **Review my responses** appears in the top-right header next to the help button and reopens the first candidate. Stop gracefully with `Ctrl+C` (SIGINT) or SIGTERM: Vibe Check writes the final summary and exits with status `0`. A forced termination such as SIGKILL cannot write that shutdown summary, but accepted feedback already emitted to an output capture remains available. Without `--output` or caller output capture, Vibe Check does not persist session data to a file.
 
 ## Campaign files
 
@@ -44,6 +44,13 @@ Feedback is scoped to the running session and stays in memory until the server s
 ## Options
 
 Choose a voting mechanic when starting the Campaign:
+
+Name the Campaign with a title or review question using `--name` or `-n`. The default title is `vibe-check`; supplied names are trimmed and must contain 1–255 characters:
+
+```bash
+vibe-check serve ./candidate-variants --name "Which landing page is clearest?"
+vibe-check serve ./candidate-variants -n "Choose the strongest draft"
+```
 
 ```bash
 # Default: Pass, Keep, or Love; the CLI summary ranks Loves, then Keeps.
@@ -64,7 +71,7 @@ Use another loopback port when `4173` is unavailable:
 vibe-check serve ./candidate-variants --port 4214
 ```
 
-Short aliases: `--vote` for `--voting`, `-p` for `--port`, `-o` for `--output`, and `-t` for `--tunnel`.
+Short aliases: `--vote` for `--voting`, `-n` for `--name`, `-p` for `--port`, `-o` for `--output`, and `-t` for `--tunnel`.
 
 Emit newline-delimited JSON lifecycle events for automation:
 

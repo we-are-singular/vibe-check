@@ -65,13 +65,20 @@ npm install -g @we-are-singular/vibe-check
 vibe-check serve ./candidate-variants
 ```
 
-Open the printed review URL in a browser. Each browser session reviews one candidate at a time and can return with icon-only **Previous** or **Next** controls to change earlier feedback. Tinder verdicts advance automatically; reaching the end shows a thank-you screen even when some candidates are unanswered. Completed sessions reopen on the thank-you screen, where **Review my responses** reopens the final candidate and its earlier feedback remains editable. Aggregate feedback is available in the creator's final CLI summary.
+Open the printed review URL in a browser. Each browser session reviews one candidate at a time and can return with icon-only **Previous** or **Next** controls to change earlier feedback. Tinder verdicts advance automatically; reaching the end shows a thank-you screen even when some candidates are unanswered. Completed sessions reopen on the thank-you screen, where **Review my responses** reopens the first candidate and its earlier feedback remains editable. Aggregate feedback is available in the creator's final CLI summary.
 
 The question-mark button explains the current voting system in the review UI.
 
 ## Choose a voting system
 
 Set the feedback mechanic when opening the Campaign. Use `--voting`; `--vote` is its short alias. The choice controls both the reviewer UI and the creator's final CLI summary.
+
+Give the Campaign a title or question with `--name` or `-n`. The default is `vibe-check`; supplied names are trimmed and must contain 1–255 characters:
+
+```bash
+vibe-check serve ./candidate-variants --name "Which direction should we ship?"
+vibe-check serve ./candidate-variants -n "Choose the strongest proposal"
+```
 
 ### `tinder` — fast triage
 
@@ -107,7 +114,7 @@ vibe-check serve ./candidate-variants --voting comment
 
 Every voting system permits unanswered candidates. Reviewers can return with **Previous** or **Next** controls and revise recorded feedback before the session ends.
 
-Other option aliases: `-p` for `--port`, `-o` for `--output`, and `-t` for `--tunnel`.
+Other option aliases: `-n` for `--name`, `-p` for `--port`, `-o` for `--output`, and `-t` for `--tunnel`.
 
 Feedback is scoped to the running session and remains in memory until Vibe Check stops. Stop gracefully with `Ctrl+C` (SIGINT) or SIGTERM: Vibe Check writes the final session summary and exits successfully with status `0`. A forced termination such as SIGKILL does not run shutdown handlers and cannot write that final summary; accepted feedback already mirrored to an output capture remains available. Without `--output` or caller output capture, Vibe Check does not persist session data to a file.
 

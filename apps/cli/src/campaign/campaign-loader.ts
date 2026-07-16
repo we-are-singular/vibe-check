@@ -1,5 +1,5 @@
 import { readdir } from "node:fs/promises"
-import { basename, extname, resolve } from "node:path"
+import { extname, resolve } from "node:path"
 import type { RenderedVibe, VibeRenderer } from "../types.js"
 import { stableVibeId } from "./utils.js"
 
@@ -17,7 +17,7 @@ export type Campaign = {
 export class CampaignLoader {
   constructor(private readonly renderers: readonly VibeRenderer[]) {}
 
-  async load(directory: string): Promise<Campaign> {
+  async load(directory: string, title = "vibe-check"): Promise<Campaign> {
     const absoluteDirectory = resolve(normalizeCampaignDirectoryPath(directory))
     const entries = await this.readDirectory(absoluteDirectory)
     const candidateNames = entries
@@ -56,7 +56,7 @@ export class CampaignLoader {
 
     return {
       directory: absoluteDirectory,
-      title: basename(absoluteDirectory),
+      title,
       vibes,
     }
   }
