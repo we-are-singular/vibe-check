@@ -2,10 +2,10 @@ import { Hono, type Context } from "hono"
 import { bodyLimit } from "hono/body-limit"
 import type { Campaign } from "../campaign/campaign-loader.js"
 import { renderPreviewDocument } from "../campaign/renderers/preview-document.js"
-import type { Vote } from "../types.js"
-import { VOTE_VALUES } from "../types.js"
+import type { Feedback } from "../types.js"
+import { isFeedbackForVotingSystem } from "../types.js"
 import { getErrorMessage, isRecord } from "../utils.js"
-import type { InMemoryVoteStore } from "./in-memory-vote-store.js"
+import type { InMemoryFeedbackStore } from "./in-memory-feedback-store.js"
 import { ViewerAssets, type ViewerAssetSource } from "./viewer-assets.js"
 
 const MAX_JSON_BYTES = 32 * 1024
@@ -17,7 +17,7 @@ const VIBE_CSP =
 /** Dependencies supplied by the local Node host or a future portable runtime. */
 export type ReviewAppDependencies = {
   readonly campaign: Campaign
-  readonly voteStore: InMemoryVoteStore
+  readonly feedbackStore: InMemoryFeedbackStore
   readonly viewerAssets?: ViewerAssetSource
 }
 
@@ -27,7 +27,7 @@ export type ReviewAppDependencies = {
  */
 export function createReviewApp({
   campaign,
-  voteStore,
+  feedbackStore,
   viewerAssets = new ViewerAssets(),
 }: ReviewAppDependencies): Hono {
   const vibeById = new Map(campaign.vibes.map(vibe => [vibe.id, vibe]))
@@ -92,8 +92,10 @@ export function createReviewApp({
       vibes: campaign.vibes.map(vibe => ({
         file: vibe.file,
         id: vibe.id,
+        kind: vibe.preview.kind,
         label: vibe.label,
       })),
+      votingSystem: feedbackStore.votingSystem,
     })
   })
   app.post("/api/session", async context => {
@@ -103,20 +105,33 @@ export function createReviewApp({
     }
 
     context.header("cache-control", "no-store")
-    return context.json(voteStore.createOrResume(body.sessionId))
+    return context.json(feedbackStore.createOrResume(body.sessionId))
   })
-  app.post("/api/votes", async context => {
+  app.post("/api/session/complete", async context => {
     const body = await parseJsonRequest(context)
-    if (!isRecord(body) || typeof body.sessionId !== "string" || typeof body.vibeId !== "string") {
-      return context.json({ error: "sessionId and vibeId are required strings." }, 400)
-    }
-    if (typeof body.vote !== "string" || !VOTE_VALUES.includes(body.vote as Vote)) {
-      return context.json({ error: "vote must be pass, keep, or love." }, 400)
+    if (!isRecord(body) || typeof body.sessionId !== "string") {
+      return context.json({ error: "sessionId is required." }, 400)
     }
 
     try {
       context.header("cache-control", "no-store")
-      return context.json(await voteStore.recordVote(body.sessionId, body.vibeId, body.vote as Vote))
+      return context.json(feedbackStore.completeSession(body.sessionId))
+    } catch (error) {
+      return context.json({ error: getErrorMessage(error) }, 409)
+    }
+  })
+  app.post("/api/feedback", async context => {
+    const body = await parseJsonRequest(context)
+    if (!isRecord(body) || typeof body.sessionId !== "string" || typeof body.vibeId !== "string") {
+      return context.json({ error: "sessionId and vibeId are required strings." }, 400)
+    }
+    if (!isFeedbackForVotingSystem(body.feedback, feedbackStore.votingSystem)) {
+      return context.json({ error: `feedback must match the ${feedbackStore.votingSystem} voting system.` }, 400)
+    }
+
+    try {
+      context.header("cache-control", "no-store")
+      return context.json(await feedbackStore.recordFeedback(body.sessionId, body.vibeId, body.feedback as Feedback))
     } catch (error) {
       return context.json({ error: getErrorMessage(error) }, 409)
     }
@@ -126,20 +141,9 @@ export function createReviewApp({
     if (!sessionId) return context.json({ error: "sessionId is required." }, 400)
 
     try {
-      const session = voteStore.getSession(sessionId)
+      feedbackStore.getSession(sessionId)
       context.header("cache-control", "no-store")
-      if (!voteStore.isComplete(sessionId)) {
-        return context.json(
-          {
-            completedVibes: Object.keys(session.votes).length,
-            error: "Vote on every vibe before viewing aggregate results.",
-            totalVibes: campaign.vibes.length,
-          },
-          409
-        )
-      }
-
-      return context.json({ results: voteStore.results() })
+      return context.json({ results: feedbackStore.results() })
     } catch (error) {
       return context.json({ error: getErrorMessage(error) }, 409)
     }

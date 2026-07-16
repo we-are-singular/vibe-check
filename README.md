@@ -29,9 +29,9 @@ Start a review session:
 vibe-check serve ./candidate-variants
 ```
 
-Open the printed review URL. It starts on your machine and can be shared with `--tunnel`. Review each candidate and give feedback with **Pass**, **Keep**, or **Love**. After you respond to every candidate, Vibe Check shows the session results.
+Open the printed review URL. It starts on your machine and can be shared with `--tunnel`. The default `tinder` mechanic offers **Pass**, **Keep**, and **Love**; selecting one advances to the next candidate. Use the icon-only **Previous** and **Next** controls to revisit candidates; previously recorded feedback stays selected and can be changed. Reaching the end shows a thank-you screen; the Campaign owner receives aggregate feedback in the final CLI session summary.
 
-Feedback is scoped to the running session and stays in memory until the server stops. Stop gracefully with `Ctrl+C` (SIGINT) or SIGTERM; Vibe Check then writes the final session summary to stdout. A forced kill such as SIGKILL prevents that shutdown summary, but any accepted votes already emitted to an output capture remain available. Without `--output` or caller output capture, Vibe Check does not persist session data to a file.
+Feedback is scoped to the running session and stays in memory until the server stops. Completed sessions reopen on their thank-you screen; use **Review my responses** to revisit the final candidate and revise earlier feedback. Stop gracefully with `Ctrl+C` (SIGINT) or SIGTERM; Vibe Check then writes the final session summary to stdout. A forced kill such as SIGKILL prevents that shutdown summary, but any accepted feedback already emitted to an output capture remains available. Without `--output` or caller output capture, Vibe Check does not persist session data to a file.
 
 ## Campaign files
 
@@ -42,11 +42,28 @@ Feedback is scoped to the running session and stays in memory until the server s
 
 ## Options
 
+Choose a voting mechanic when starting the Campaign:
+
+```bash
+# Default: Pass, Keep, or Love; the CLI summary ranks Loves, then Keeps.
+vibe-check serve ./candidate-variants --voting tinder
+
+# One-to-five star ratings; the CLI summary ranks average rating.
+vibe-check serve ./candidate-variants --voting stars
+
+# Optional written feedback; the CLI summary reports and lists submitted comments.
+vibe-check serve ./candidate-variants --voting comment
+```
+
+All voting systems allow unanswered candidates. Unrated Vibes show no star average, while a comment is recorded only when text is submitted.
+
 Use another loopback port when `4173` is unavailable:
 
 ```bash
 vibe-check serve ./candidate-variants --port 4214
 ```
+
+Short aliases: `--vote` for `--voting`, `-p` for `--port`, `-o` for `--output`, and `-t` for `--tunnel`.
 
 Emit newline-delimited JSON lifecycle events for automation:
 
@@ -54,7 +71,7 @@ Emit newline-delimited JSON lifecycle events for automation:
 vibe-check serve ./candidate-variants --json
 ```
 
-For reliable agent or process retrieval, mirror every CLI lifecycle event—including each accepted vote and the final summary—to a file. `--output` replaces an existing file while stdout and stderr continue normally:
+For reliable agent or process retrieval, mirror every CLI lifecycle event—including each accepted feedback response and the final summary—to a file. `--output` replaces an existing file while stdout and stderr continue normally:
 
 ```bash
 vibe-check serve ./candidate-variants --json --output vibe-check.log
@@ -66,7 +83,7 @@ The caller can instead capture the process streams directly:
 vibe-check serve ./candidate-variants --json > vibe-check.log 2>&1
 ```
 
-With `--json`, each accepted vote is an event with `type: "vote"`, `sessionId`, `vibe`, and `vote`. If a forced kill prevents the final `type: "stopped"` summary, group captured vote events by `vibe.id`: `love` increments both Love and Keep, `keep` increments Keep, and `pass` increments neither.
+With `--json`, default Tinder feedback emits `type: "vote"` with `eventId`, `sessionId`, `vibe`, and `vote`. Star ratings and comments emit `type: "feedback"` with `eventId`, `sessionId`, `vibe`, and a `feedback` object. Reviewers may change their feedback; when replaying captured events, keep the latest event for each `(sessionId, vibe.id)` pair. An output file records each accepted feedback event once if CLI emission retries. In human-readable mode, accepted feedback uses `[sessionId] [filename] message` records; final comment summaries list each submitted comment after the results table.
 
 Share a temporary public review link through an installed tunnel provider:
 
@@ -109,10 +126,21 @@ npm run test:coverage
 npm run build
 ```
 
-For development, `dev` rebuilds the viewer and watches both the viewer and CLI source:
+Start a demo harness from the repository root. Each command builds the CLI and viewer, then runs the compiled CLI:
 
 ```bash
-npm run dev -- serve ./candidate-variants
+npm run cli
+npm run cli -- --voting stars
+npm run cli -- --voting comment --port 4214
+
+# Three Markdown candidates for reviewing the responsive Markdown renderer.
+npm run cli:markdown
+```
+
+The default harness serves the five `demo/theme-vibes` candidates retained after a prior star review; `cli:markdown` serves `demo/markdown-vibes`. For continuous rebuilds of both the viewer and CLI, use the watcher. Workspace scripts run from `apps/cli`, so demo paths are relative to that directory; the second `--` forwards CLI flags through npm:
+
+```bash
+npm run dev -- serve ../../demo/theme-vibes -- --voting stars
 ```
 
 This is rebuild-on-save, not HMR. The CLI always serves the current `dist/viewer` output.

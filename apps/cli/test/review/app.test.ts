@@ -1,11 +1,13 @@
+import type { Hono } from "hono"
 import { Buffer } from "node:buffer"
 
 import type { Campaign } from "../../src/campaign/campaign-loader.js"
-import { InMemoryVoteStore } from "../../src/review/in-memory-vote-store.js"
+import { InMemoryFeedbackStore } from "../../src/review/in-memory-feedback-store.js"
 import { createReviewApp } from "../../src/review/app.js"
 import type { ViewerAssetSource } from "../../src/review/viewer-assets.js"
+import type { VotingSystem } from "../../src/types.js"
 
-function createTestApp(viewerAssetsOverride?: ViewerAssetSource) {
+function createTestApp(votingSystem: VotingSystem = "tinder", viewerAssetsOverride?: ViewerAssetSource) {
   const campaign = {
     directory: "/campaign",
     title: "Campaign",
@@ -47,9 +49,19 @@ function createTestApp(viewerAssetsOverride?: ViewerAssetSource) {
 
   return createReviewApp({
     campaign,
+    feedbackStore: new InMemoryFeedbackStore(campaign.vibes, { votingSystem }),
     viewerAssets,
-    voteStore: new InMemoryVoteStore(campaign.vibes),
   })
+}
+
+async function createSession(app: Hono): Promise<{ sessionId: string }> {
+  const response = await app.request("/api/session", {
+    body: "{}",
+    headers: { "content-type": "application/json" },
+    method: "POST",
+  })
+  expect(response.status).toBe(200)
+  return (await response.json()) as { sessionId: string }
 }
 
 describe("createReviewApp", () => {
@@ -61,6 +73,13 @@ describe("createReviewApp", () => {
     expect(viewer.headers.get("content-security-policy")).toContain("frame-src 'self'")
     expect(viewer.headers.get("cache-control")).toBe("no-store")
     expect(await viewer.text()).toContain('id="root"')
+
+    const campaign = await app.request("/api/campaign")
+    await expect(campaign.json()).resolves.toMatchObject({
+      title: "Campaign",
+      vibes: [{ kind: "html" }, { kind: "markdown" }],
+      votingSystem: "tinder",
+    })
 
     const asset = await app.request("/viewer-assets/app.js")
     expect(asset.status).toBe(200)
@@ -75,35 +94,30 @@ describe("createReviewApp", () => {
     expect(previewHtml).toContain("<h1>Markdown candidate</h1><p>Safe prose.</p>")
   })
 
-  it("preserves vote and results contracts", async () => {
+  it("preserves default Tinder results while allowing a changed verdict", async () => {
     const app = createTestApp()
-    const sessionResponse = await app.request("/api/session", {
-      body: "{}",
-      headers: { "content-type": "application/json" },
-      method: "POST",
-    })
-    const session = (await sessionResponse.json()) as { sessionId: string }
+    const session = await createSession(app)
 
-    expect(sessionResponse.status).toBe(200)
-    expect(session.sessionId).toHaveLength(32)
-
-    const incompleteResults = await app.request(`/api/results?sessionId=${session.sessionId}`)
-    expect(incompleteResults.status).toBe(409)
-    await expect(incompleteResults.json()).resolves.toMatchObject({
-      completedVibes: 0,
-      totalVibes: 2,
+    const unansweredResults = await app.request(`/api/results?sessionId=${session.sessionId}`)
+    expect(unansweredResults.status).toBe(200)
+    await expect(unansweredResults.json()).resolves.toMatchObject({
+      results: [
+        { id: "markdown-vibe", keepCount: 0, loveCount: 0 },
+        { id: "html-vibe", keepCount: 0, loveCount: 0 },
+      ],
     })
 
-    for (const [vibeId, vote] of [
-      ["html-vibe", "love"],
-      ["markdown-vibe", "keep"],
+    for (const [vibeId, feedback] of [
+      ["html-vibe", { kind: "tinder", vote: "love" }],
+      ["html-vibe", { kind: "tinder", vote: "keep" }],
+      ["markdown-vibe", { kind: "tinder", vote: "keep" }],
     ] as const) {
-      const voteResponse = await app.request("/api/votes", {
-        body: JSON.stringify({ sessionId: session.sessionId, vibeId, vote }),
+      const response = await app.request("/api/feedback", {
+        body: JSON.stringify({ feedback, sessionId: session.sessionId, vibeId }),
         headers: { "content-type": "application/json" },
         method: "POST",
       })
-      expect(voteResponse.status).toBe(200)
+      expect(response.status).toBe(200)
     }
 
     const resultsResponse = await app.request(`/api/results?sessionId=${session.sessionId}`)
@@ -111,19 +125,99 @@ describe("createReviewApp", () => {
     await expect(resultsResponse.json()).resolves.toEqual({
       results: [
         {
-          file: "plain.html",
-          id: "html-vibe",
-          keepCount: 1,
-          label: "Plain HTML",
-          loveCount: 1,
-        },
-        {
           file: "brief.md",
           id: "markdown-vibe",
           keepCount: 1,
           label: "Markdown brief",
           loveCount: 0,
         },
+        {
+          file: "plain.html",
+          id: "html-vibe",
+          keepCount: 1,
+          label: "Plain HTML",
+          loveCount: 0,
+        },
+      ],
+    })
+  })
+
+  it("persists completion through the session API", async () => {
+    const app = createTestApp()
+    const session = await createSession(app)
+
+    const completed = await app.request("/api/session/complete", {
+      body: JSON.stringify({ sessionId: session.sessionId }),
+      headers: { "content-type": "application/json" },
+      method: "POST",
+    })
+    expect(completed.status).toBe(200)
+    await expect(completed.json()).resolves.toMatchObject({ isComplete: true, sessionId: session.sessionId })
+
+    const resumed = await app.request("/api/session", {
+      body: JSON.stringify({ sessionId: session.sessionId }),
+      headers: { "content-type": "application/json" },
+      method: "POST",
+    })
+    await expect(resumed.json()).resolves.toMatchObject({ isComplete: true, sessionId: session.sessionId })
+  })
+
+  it("validates and aggregates star ratings", async () => {
+    const app = createTestApp("stars")
+    const session = await createSession(app)
+
+    const invalid = await app.request("/api/feedback", {
+      body: JSON.stringify({
+        feedback: { kind: "stars", rating: 6 },
+        sessionId: session.sessionId,
+        vibeId: "html-vibe",
+      }),
+      headers: { "content-type": "application/json" },
+      method: "POST",
+    })
+    expect(invalid.status).toBe(400)
+
+    for (const [vibeId, rating] of [
+      ["html-vibe", 4],
+      ["markdown-vibe", 5],
+    ] as const) {
+      const response = await app.request("/api/feedback", {
+        body: JSON.stringify({ feedback: { kind: "stars", rating }, sessionId: session.sessionId, vibeId }),
+        headers: { "content-type": "application/json" },
+        method: "POST",
+      })
+      expect(response.status).toBe(200)
+    }
+
+    const results = await app.request(`/api/results?sessionId=${session.sessionId}`)
+    await expect(results.json()).resolves.toMatchObject({
+      results: [
+        { averageRating: 5, id: "markdown-vibe", ratingCount: 1, votingSystem: "stars" },
+        { averageRating: 4, id: "html-vibe", ratingCount: 1, votingSystem: "stars" },
+      ],
+    })
+  })
+
+  it("returns comment results even when some Vibes have no response", async () => {
+    const app = createTestApp("comment")
+    const session = await createSession(app)
+
+    const response = await app.request("/api/feedback", {
+      body: JSON.stringify({
+        feedback: { comment: "Clear hierarchy.", kind: "comment" },
+        sessionId: session.sessionId,
+        vibeId: "html-vibe",
+      }),
+      headers: { "content-type": "application/json" },
+      method: "POST",
+    })
+    expect(response.status).toBe(200)
+
+    const results = await app.request(`/api/results?sessionId=${session.sessionId}`)
+    await expect(results.json()).resolves.toMatchObject({
+      results: [
+        { commentCount: 1, id: "html-vibe", votingSystem: "comment" },
+        { commentCount: 0, id: "markdown-vibe", votingSystem: "comment" },
       ],
     })
   })
@@ -149,7 +243,7 @@ describe("createReviewApp", () => {
   })
 
   it("keeps viewer asset failures separate from malformed request JSON", async () => {
-    const app = createTestApp({
+    const app = createTestApp("tinder", {
       async asset() {
         throw new SyntaxError("manifest is malformed")
       },

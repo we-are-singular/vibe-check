@@ -14,7 +14,9 @@ describe("AgentSkill", () => {
     expect(contents).toContain("### ngrok")
     expect(contents).toContain("npm install -g @we-are-singular/vibe-check")
     expect(contents).toContain("--json --output vibe-check.log")
-    expect(contents).toContain("any accepted votes already emitted to an output capture remain available.")
+    expect(contents).toContain("any accepted feedback already emitted to an output capture remains available.")
+    expect(contents).toContain("--voting stars")
+    expect(contents).toContain("--voting comment")
   })
 })
 

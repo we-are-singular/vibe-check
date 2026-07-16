@@ -26,4 +26,20 @@ describe("CliOutputFile", () => {
 
     await expect(readFile(outputPath, "utf8")).resolves.toBe("started\nstopped\n")
   })
+
+  it("does not duplicate a successfully persisted feedback event retry", async () => {
+    const directory = await mkdtemp(join(tmpdir(), "vibe-check-output-"))
+    temporaryDirectories.push(directory)
+    const outputPath = join(directory, "session.log")
+    const output = await CliOutputFile.create(outputPath)
+    try {
+      await output.append("feedback\n", "session-1:first:1")
+      await output.append("feedback\n", "session-1:first:1")
+      await output.append("feedback\n", "session-1:first:2")
+    } finally {
+      await output.close()
+    }
+
+    await expect(readFile(outputPath, "utf8")).resolves.toBe("feedback\nfeedback\n")
+  })
 })

@@ -5,64 +5,191 @@ import { cleanup, render, screen } from "@testing-library/react"
 import { userEvent } from "@testing-library/user-event"
 
 import { ReviewApiClient, type Campaign, type ReviewSession } from "../../../src/review/viewer/api.js"
-import type { ResultRow, Vote } from "../../../src/types.js"
+import type { Feedback } from "../../../src/types.js"
 import { ViewerApp } from "../../../src/review/viewer/app.js"
 
-const campaign: Campaign = {
+const tinderCampaign: Campaign = {
   title: "Launch contenders",
-  vibes: [{ file: "aurora.html", id: "aurora", label: "Aurora" }],
+  vibes: [
+    { file: "aurora.html", id: "aurora", kind: "html", label: "Aurora" },
+    { file: "beacon.html", id: "beacon", kind: "html", label: "Beacon" },
+  ],
+  votingSystem: "tinder",
 }
 
-const results: readonly ResultRow[] = [
-  {
-    file: "aurora.html",
-    id: "aurora",
-    keepCount: 3,
-    label: "Aurora",
-    loveCount: 2,
-  },
-]
+const localStorageValues = new Map<string, string>()
+
+beforeEach(() => {
+  Object.defineProperty(window, "localStorage", {
+    configurable: true,
+    value: {
+      clear: () => localStorageValues.clear(),
+      getItem: (key: string) => localStorageValues.get(key) ?? null,
+      removeItem: (key: string) => localStorageValues.delete(key),
+      setItem: (key: string, value: string) => localStorageValues.set(key, value),
+    },
+  })
+})
 
 class FakeReviewApiClient extends ReviewApiClient {
-  readonly recordedVotes: Array<{ sessionId: string; vibeId: string; vote: Vote }> = []
+  readonly recordedFeedback: Array<{ feedback: Feedback; sessionId: string; vibeId: string }> = []
+  private session: ReviewSession = { feedback: {}, isComplete: false, sessionId: "session-1" }
+
+  constructor(private readonly campaign: Campaign) {
+    super()
+  }
 
   override async getCampaign(): Promise<Campaign> {
-    return campaign
+    return this.campaign
   }
 
   override async createOrResumeSession(): Promise<ReviewSession> {
-    return { sessionId: "session-1", votes: {} }
+    return this.session
   }
 
-  override async recordVote(input: { sessionId: string; vibeId: string; vote: Vote }): Promise<ReviewSession> {
-    this.recordedVotes.push(input)
-    return { sessionId: input.sessionId, votes: { [input.vibeId]: input.vote } }
+  override async recordFeedback(input: {
+    feedback: Feedback
+    sessionId: string
+    vibeId: string
+  }): Promise<ReviewSession> {
+    this.recordedFeedback.push(input)
+    this.session = {
+      feedback: { ...this.session.feedback, [input.vibeId]: input.feedback },
+      isComplete: this.session.isComplete,
+      sessionId: input.sessionId,
+    }
+    return this.session
   }
 
-  override async getResults(sessionId: string): Promise<readonly ResultRow[]> {
-    if (sessionId !== "session-1") throw new Error("Unexpected session")
-    return results
+  override async completeSession(sessionId: string): Promise<ReviewSession> {
+    if (sessionId !== this.session.sessionId) throw new Error("Unexpected session")
+    this.session = { ...this.session, isComplete: true }
+    return this.session
   }
+}
+
+function getBottomQueueButton(name: "Finish review" | "Next Vibe" | "Previous Vibe"): HTMLElement {
+  const buttons = screen.getAllByRole("button", { name })
+  const button = buttons.at(-1)
+  if (!button) throw new Error(`Missing bottom ${name} button.`)
+  return button
 }
 
 describe("ViewerApp", () => {
   afterEach(() => {
     cleanup()
+    window.history.replaceState({}, "", "/")
+    localStorageValues.clear()
   })
 
-  it("posts a Love from the heart action and presents heart Loves with numeric Keeps", async () => {
-    const api = new FakeReviewApiClient()
+  it("renders a thank-you screen at the results route without starting another review", async () => {
+    window.history.replaceState({}, "", "/results")
+    const api = new FakeReviewApiClient(tinderCampaign)
+
+    render(<ViewerApp api={api} />)
+
+    await screen.findByRole("heading", { name: "Thanks for sharing your perspective." })
+    expect(screen.queryByTitle("Aurora")).toBeNull()
+    expect(screen.getByRole("link", { name: "Star Vibe Check on GitHub" }).getAttribute("href")).toBe(
+      "https://github.com/we-are-singular/vibe-check"
+    )
+  })
+  it("advances after a Tinder verdict and preserves a revised opinion when returning", async () => {
+    const api = new FakeReviewApiClient(tinderCampaign)
     const user = userEvent.setup()
 
     render(<ViewerApp api={api} />)
 
-    await user.click(await screen.findByRole("button", { name: "I love it" }))
+    await screen.findByTitle("Aurora")
+    await user.click(screen.getByRole("button", { name: "Pass this Vibe" }))
+    await screen.findByTitle("Beacon")
 
-    await screen.findByRole("heading", { name: "Results" })
-    expect(api.recordedVotes).toEqual([{ sessionId: "session-1", vibeId: "aurora", vote: "love" }])
+    await user.click(getBottomQueueButton("Previous Vibe"))
+    await screen.findByTitle("Aurora")
+    expect(screen.getByRole("button", { name: "Pass this Vibe" }).getAttribute("aria-pressed")).toBe("true")
 
-    const loves = screen.getByLabelText("2 loves")
-    expect(loves.textContent).toBe("❤️❤️")
-    expect(screen.getByLabelText("3 keeps").textContent).toBe("3")
+    await user.click(screen.getByRole("button", { name: "I love it" }))
+    await screen.findByTitle("Beacon")
+    await user.click(screen.getByRole("button", { name: "Keep this Vibe" }))
+    await screen.findByRole("heading", { name: "Thanks for sharing your perspective." })
+
+    expect(api.recordedFeedback).toEqual([
+      { feedback: { kind: "tinder", vote: "pass" }, sessionId: "session-1", vibeId: "aurora" },
+      { feedback: { kind: "tinder", vote: "love" }, sessionId: "session-1", vibeId: "aurora" },
+      { feedback: { kind: "tinder", vote: "keep" }, sessionId: "session-1", vibeId: "beacon" },
+    ])
+    expect(screen.getByText("npx skills add we-are-singular/vibe-check").textContent).toBe(
+      "npx skills add we-are-singular/vibe-check"
+    )
+    expect(screen.getByRole("link", { name: "Star Vibe Check on GitHub" }).getAttribute("href")).toBe(
+      "https://github.com/we-are-singular/vibe-check"
+    )
+
+    cleanup()
+    render(<ViewerApp api={api} />)
+    await screen.findByRole("button", { name: "Review my responses" })
+    await user.click(screen.getByRole("button", { name: "Review my responses" }))
+    await screen.findByTitle("Beacon")
+  })
+
+  it("auto-advances after a star rating and keeps its cumulative highlight when returning", async () => {
+    const campaign: Campaign = { ...tinderCampaign, votingSystem: "stars" }
+    const api = new FakeReviewApiClient(campaign)
+    const user = userEvent.setup()
+
+    render(<ViewerApp api={api} />)
+
+    await screen.findByTitle("Aurora")
+    await user.click(screen.getByRole("button", { name: "Rate this Vibe 4 stars" }))
+    await screen.findByTitle("Beacon")
+    await user.click(getBottomQueueButton("Previous Vibe"))
+
+    expect(screen.getByRole("button", { name: "Rate this Vibe 1 star" }).getAttribute("data-lit")).toBe("true")
+    expect(screen.getByRole("button", { name: "Rate this Vibe 4 stars" }).getAttribute("aria-pressed")).toBe("true")
+    expect(screen.getByRole("button", { name: "Rate this Vibe 5 stars" }).getAttribute("data-lit")).toBeNull()
+  })
+
+  it("renders Markdown at full width regardless of the saved HTML preview preference", async () => {
+    const markdownCampaign: Campaign = {
+      ...tinderCampaign,
+      vibes: [
+        { file: "aurora.md", id: "aurora", kind: "markdown", label: "Aurora" },
+        { file: "beacon.md", id: "beacon", kind: "markdown", label: "Beacon" },
+      ],
+      votingSystem: "stars",
+    }
+    window.localStorage.setItem("vibe-check:preview-width", "phone")
+    const api = new FakeReviewApiClient(markdownCampaign)
+    const user = userEvent.setup()
+
+    render(<ViewerApp api={api} />)
+
+    await screen.findByTitle("Aurora")
+    expect(document.querySelector(".review-preview")?.getAttribute("data-preview-width")).toBe("full")
+    expect(screen.queryByRole("group", { name: "Preview width" })).toBeNull()
+    await user.click(screen.getByRole("button", { name: "How this review works" }))
+    expect(screen.getByRole("dialog").textContent).toContain("Star rating")
+    expect(screen.getByRole("dialog").textContent).toContain("More lit stars means a stronger fit.")
+    await user.click(screen.getByRole("button", { name: "Got it" }))
+  })
+
+  it("saves optional comments from Next and finishes after every Vibe", async () => {
+    const campaign: Campaign = { ...tinderCampaign, votingSystem: "comment" }
+    const api = new FakeReviewApiClient(campaign)
+    const user = userEvent.setup()
+
+    render(<ViewerApp api={api} />)
+
+    const comment = await screen.findByRole("textbox", { name: "Feedback for this Vibe" })
+    await user.type(comment, "Clear hierarchy.")
+    await user.click(getBottomQueueButton("Next Vibe"))
+    await screen.findByTitle("Beacon")
+    await user.click(getBottomQueueButton("Finish review"))
+    await screen.findByRole("heading", { name: "Thanks for sharing your perspective." })
+
+    expect(api.recordedFeedback).toEqual([
+      { feedback: { comment: "Clear hierarchy.", kind: "comment" }, sessionId: "session-1", vibeId: "aurora" },
+    ])
+    expect(screen.queryByRole("heading", { name: "Results" })).toBeNull()
   })
 })

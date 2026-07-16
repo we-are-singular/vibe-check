@@ -3,10 +3,11 @@ import { CampaignLoader } from "../campaign/campaign-loader.js"
 import { HtmlFragmentRenderer } from "../campaign/renderers/html-fragment-renderer.js"
 import { MarkdownRenderer } from "../campaign/renderers/markdown-renderer.js"
 import { VibeCheckCommand } from "../vibe-check-command.js"
-import { InMemoryVoteStore } from "../review/in-memory-vote-store.js"
+import { InMemoryFeedbackStore } from "../review/in-memory-feedback-store.js"
 import { Server } from "../review/server.js"
 import { startTunnel, TUNNEL_PROVIDERS, type ActiveTunnel } from "../tunnel/tunnel.js"
 import { getErrorMessage } from "../utils.js"
+import { VOTING_SYSTEM_VALUES, type VotingSystem } from "../types.js"
 
 /** Starts the intentionally ephemeral local HTML review POC. */
 export class ServeCommand extends VibeCheckCommand {
@@ -27,18 +28,23 @@ export class ServeCommand extends VibeCheckCommand {
 
   directory = Option.String()
 
-  port = Option.String("--port", {
+  port = Option.String("--port,-p", {
     description: "Loopback port (1-65535, default: 4173)",
     required: false,
   })
 
-  outputPath = Option.String("--output", {
+  outputPath = Option.String("--output,-o", {
     description: "Mirror CLI lifecycle output to a file (replaces an existing file)",
     required: false,
   })
 
-  tunnel = Option.String("--tunnel", {
+  tunnel = Option.String("--tunnel,-t", {
     description: `Temporary public tunnel provider (${TUNNEL_PROVIDERS.join(", ")}; see details for prerequisites)`,
+    required: false,
+  })
+
+  voting = Option.String("--voting,--vote", {
+    description: `Feedback mechanic (${VOTING_SYSTEM_VALUES.join(", ")}; default: tinder)`,
     required: false,
   })
 
@@ -75,11 +81,34 @@ export class ServeCommand extends VibeCheckCommand {
         return 1
       }
 
+      const votingSystem =
+        VOTING_SYSTEM_VALUES.find(system => system === this.voting) ??
+        (this.voting === undefined ? "tinder" : undefined)
+      if (votingSystem === undefined) {
+        await this.output({ type: "error", message: `--voting must be one of: ${VOTING_SYSTEM_VALUES.join(", ")}.` })
+        return 1
+      }
+
       const campaign = await new CampaignLoader([new HtmlFragmentRenderer(), new MarkdownRenderer()]).load(
         this.directory
       )
-      const voteStore = new InMemoryVoteStore(campaign.vibes, vote => this.output({ type: "vote", ...vote }))
-      server = new Server(campaign, voteStore)
+      const feedbackStore = new InMemoryFeedbackStore(campaign.vibes, {
+        recordAcceptedFeedback: feedback => {
+          if (feedback.feedback.kind === "tinder") {
+            return this.output({
+              eventId: feedback.eventId,
+              sessionId: feedback.sessionId,
+              type: "vote",
+              vibe: feedback.vibe,
+              vote: feedback.feedback.vote,
+            })
+          }
+
+          return this.output({ ...feedback, type: "feedback" })
+        },
+        votingSystem: votingSystem as VotingSystem,
+      })
+      server = new Server(campaign, feedbackStore)
       const reviewUrl = (await server.start(port)).url
       activeTunnel = tunnelProvider === undefined ? undefined : await startTunnel(tunnelProvider, reviewUrl)
 
@@ -97,7 +126,7 @@ export class ServeCommand extends VibeCheckCommand {
         urls: {
           apiResults: `${reviewUrl}/api/results?sessionId=<session-id>`,
           public: activeTunnel?.publicUrl,
-          results: `${reviewUrl}/results`,
+          thankYou: `${reviewUrl}/results`,
           review: reviewUrl,
         },
       })
@@ -113,13 +142,15 @@ export class ServeCommand extends VibeCheckCommand {
       process.once("SIGTERM", stop)
       await promise
 
+      const comments = feedbackStore.comments()
       await this.output({
+        comments: comments.length > 0 ? comments : undefined,
         type: "stopped",
         hint:
           tunnelProvider === undefined
             ? "Vibe Check stopped. The session is no longer available."
             : `${tunnelProvider} tunnel closed. Vibe Check stopped. The session is no longer available.`,
-        results: voteStore.results(),
+        results: feedbackStore.results(),
       })
       return 0
     } catch (error) {

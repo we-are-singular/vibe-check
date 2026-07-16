@@ -1,10 +1,11 @@
-import type { ResultRow, SessionSnapshot, Vote } from "../../types.js"
+import type { Feedback, SessionSnapshot, VibePreview, VotingSystem } from "../../types.js"
 import { getErrorMessage } from "../../utils.js"
 
 /** Candidate metadata exposed to the browser; preview content stays server-side. */
 export type CampaignVibe = {
   file: string
   id: string
+  kind: VibePreview["kind"]
   label: string
 }
 
@@ -12,9 +13,10 @@ export type CampaignVibe = {
 export type Campaign = {
   title: string
   vibes: readonly CampaignVibe[]
+  votingSystem: VotingSystem
 }
 
-/** Browser-facing alias for the server's session verdict snapshot. */
+/** Browser-facing alias for the server's session feedback snapshot. */
 export type ReviewSession = SessionSnapshot
 
 /** Calls the review HTTP API from the bundled browser viewer. */
@@ -33,17 +35,20 @@ export class ReviewApiClient {
     })
   }
 
-  async recordVote(input: { sessionId: string; vibeId: string; vote: Vote }): Promise<ReviewSession> {
-    return this.getJson<ReviewSession>("/api/votes", {
+  async recordFeedback(input: { feedback: Feedback; sessionId: string; vibeId: string }): Promise<ReviewSession> {
+    return this.getJson<ReviewSession>("/api/feedback", {
       body: JSON.stringify(input),
       headers: { "content-type": "application/json" },
       method: "POST",
     })
   }
 
-  async getResults(sessionId: string): Promise<readonly ResultRow[]> {
-    const search = new URLSearchParams({ sessionId })
-    return (await this.getJson<{ results: readonly ResultRow[] }>(`/api/results?${search.toString()}`)).results
+  async completeSession(sessionId: string): Promise<ReviewSession> {
+    return this.getJson<ReviewSession>("/api/session/complete", {
+      body: JSON.stringify({ sessionId }),
+      headers: { "content-type": "application/json" },
+      method: "POST",
+    })
   }
 
   private async getJson<T>(path: string, init?: RequestInit): Promise<T> {

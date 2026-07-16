@@ -7,6 +7,8 @@
   ],
   "type": "module",
   "scripts": {
+    "cli": "npm run build --workspace=@we-are-singular/vibe-check && node apps/cli/dist/index.js serve ./demo/theme-vibes",
+    "cli:markdown": "npm run build --workspace=@we-are-singular/vibe-check && node apps/cli/dist/index.js serve ./demo/markdown-vibes",
     "build": "npm run build --workspace=@we-are-singular/vibe-check",
     "check": "npm run format && npm run typecheck && npm run lint && npm test && npm run build",
     "dev": "npm run dev --workspace=@we-are-singular/vibe-check",

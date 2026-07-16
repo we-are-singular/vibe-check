@@ -1,6 +1,6 @@
 import { Command, Option } from "clipanion"
 import { CliOutputFile } from "./cli-output-file.js"
-import type { ResultRow, Vote } from "./types.js"
+import type { CommentLog, Feedback, ResultRow, Vote } from "./types.js"
 
 /** JSON lines emitted by CLI commands for people and automation. */
 export type CommandOutput =
@@ -14,17 +14,19 @@ export type CommandOutput =
       type: "started"
       urls: {
         apiResults: string
-        results: string
+        thankYou: string
         review: string
         public?: string
       }
     }
   | {
+      comments?: readonly CommentLog[]
       hint: string
       results: readonly ResultRow[]
       type: "stopped"
     }
   | {
+      eventId: string
       sessionId: string
       type: "vote"
       vibe: {
@@ -35,6 +37,17 @@ export type CommandOutput =
       vote: Vote
     }
   | {
+      eventId: string
+      feedback: Feedback
+      sessionId: string
+      type: "feedback"
+      vibe: {
+        file: string
+        id: string
+        label: string
+      }
+    }
+  | {
       message: string
       type: "error"
     }
@@ -42,7 +55,7 @@ export type CommandOutput =
 /** Provides human-readable text and JSON Lines lifecycle output for CLI commands. */
 export abstract class VibeCheckCommand extends Command {
   json = Option.Boolean("--json", {
-    description: "Emit newline-delimited JSON lifecycle events, including accepted votes.",
+    description: "Emit newline-delimited JSON lifecycle events, including accepted feedback.",
     required: false,
   })
 
@@ -65,15 +78,18 @@ export abstract class VibeCheckCommand extends Command {
     const rendered = this.json ? `${JSON.stringify(event)}\n` : formatTextOutput(event)
 
     try {
-      // Persist before emitting so accepted votes survive a later forced process kill.
-      await this.outputFile?.append(rendered)
+      // Persist before emitting so accepted feedback survives a later forced process kill.
+      await this.outputFile?.append(rendered, getEventId(event))
     } catch (error) {
       await this.closeOutputFile().catch(() => undefined)
       throw error
     }
-
     stream.write(rendered)
   }
+}
+
+function getEventId(event: CommandOutput): string | undefined {
+  return event.type === "vote" || event.type === "feedback" ? event.eventId : undefined
 }
 
 function formatTextOutput(event: CommandOutput): string {
@@ -85,7 +101,7 @@ function formatTextOutput(event: CommandOutput): string {
           `Loaded ${event.campaign.vibeCount} vibes from ${event.campaign.directory}.`,
           "",
           `Review:  ${event.urls.review}`,
-          `Results: ${event.urls.results}`,
+          `Thanks:  ${event.urls.thankYou}`,
           `JSON:    ${event.urls.apiResults}`,
           ...publicUrl,
           "",
@@ -94,33 +110,99 @@ function formatTextOutput(event: CommandOutput): string {
       )
     }
     case "stopped":
-      return `${formatResultTable(event.results)}\n\n${event.hint}\n`
+      return `${formatResultTable(event.results)}${formatComments(event.comments)}\n\n${event.hint}\n`
     case "vote":
-      return `Recorded ${event.vote} vote for ${asSingleLine(event.vibe.label)} (${event.vibe.file}) in session ${event.sessionId}.\n`
+      return formatRecord(event.sessionId, event.vibe.file, `vote: ${event.vote}`)
+    case "feedback":
+      return formatRecord(event.sessionId, event.vibe.file, describeFeedback(event.feedback))
     case "error":
-      return `error: ${event.message}\n`
+      return `error: ${asSingleLine(event.message)}\n`
   }
 }
 
-type ResultTableRow = readonly [vibe: string, loves: string, keeps: string]
-
 function formatResultTable(results: readonly ResultRow[]): string {
-  const headers: ResultTableRow = ["Vibe", "Loves", "Keeps"]
-  const rows: readonly ResultTableRow[] = results.map(result => [
-    asSingleLine(result.label),
-    formatLoveCount(result.loveCount),
-    String(result.keepCount),
-  ])
-  const widths: readonly [number, number, number] = [
-    Math.max(headers[0].length, ...rows.map(row => row[0].length)),
-    Math.max(headers[1].length, ...rows.map(row => row[1].length)),
-    Math.max(headers[2].length, ...rows.map(row => row[2].length)),
-  ]
+  const table = getResultTable(results)
+  const widths = table.headers.map((header, index) =>
+    Math.max(header.length, ...table.rows.map(row => row[index]?.length ?? 0))
+  )
   const divider = `+${widths.map(width => "-".repeat(width + 2)).join("+")}+`
-  const renderRow = (row: ResultTableRow) =>
-    `| ${row[0].padEnd(widths[0])} | ${row[1].padStart(widths[1])} | ${row[2].padStart(widths[2])} |`
+  const renderRow = (row: readonly string[]) =>
+    `| ${row
+      .map((cell, index) => cell.padStart(index === 0 ? cell.length : (widths[index] ?? 0)))
+      .map((cell, index) => cell.padEnd(widths[index] ?? 0))
+      .join(" | ")} |`
 
-  return ["Results", divider, renderRow(headers), divider, ...rows.map(renderRow), divider].join("\n")
+  return ["Results", divider, renderRow(table.headers), divider, ...table.rows.map(renderRow), divider].join("\n")
+}
+
+function getResultTable(results: readonly ResultRow[]): {
+  headers: readonly string[]
+  rows: readonly (readonly string[])[]
+} {
+  const first = results[0]
+  if (first && "votingSystem" in first && first.votingSystem === "stars") {
+    return {
+      headers: ["Vibe", "Rating", "Ratings"],
+      rows: results.map(result => {
+        if (!("votingSystem" in result) || result.votingSystem !== "stars") {
+          throw new Error("Mixed voting systems are not supported.")
+        }
+        return [
+          asSingleLine(result.label),
+          result.averageRating === null ? "—" : result.averageRating.toFixed(1),
+          String(result.ratingCount),
+        ]
+      }),
+    }
+  }
+  if (first && "votingSystem" in first && first.votingSystem === "comment") {
+    return {
+      headers: ["Vibe", "Comments"],
+      rows: results.map(result => {
+        if (!("votingSystem" in result) || result.votingSystem !== "comment") {
+          throw new Error("Mixed voting systems are not supported.")
+        }
+        return [asSingleLine(result.label), String(result.commentCount)]
+      }),
+    }
+  }
+
+  return {
+    headers: ["Vibe", "Loves", "Keeps"],
+    rows: results.map(result => {
+      if ("votingSystem" in result) throw new Error("Mixed voting systems are not supported.")
+      return [asSingleLine(result.label), formatLoveCount(result.loveCount), String(result.keepCount)]
+    }),
+  }
+}
+
+function describeFeedback(feedback: Feedback): string {
+  if (feedback.kind === "stars") return `rating: ${feedback.rating}/5`
+  if (feedback.kind === "comment")
+    return feedback.comment.trim() ? `comment: ${asSingleLine(feedback.comment)}` : "comment cleared"
+  return `vote: ${feedback.vote}`
+}
+
+function formatRecord(sessionId: string, vibeFile: string, message: string): string {
+  return `[${asSingleLine(sessionId)}] [${asSingleLine(vibeFile)}] ${message}\n`
+}
+
+function formatComments(comments: readonly CommentLog[] | undefined): string {
+  if (!comments?.length) return ""
+
+  return `\n\nComments\n${comments
+    .map(
+      comment =>
+        `[${asSingleLine(comment.sessionId)}] [${asSingleLine(comment.vibe.file)}]\n${formatCommentText(comment.comment)}`
+    )
+    .join("\n\n")}`
+}
+
+function formatCommentText(comment: string): string {
+  return sanitizeTerminalText(comment, true)
+    .split("\n")
+    .map(line => `  ${line}`)
+    .join("\n")
 }
 
 function formatLoveCount(loveCount: number): string {
@@ -128,5 +210,31 @@ function formatLoveCount(loveCount: number): string {
 }
 
 function asSingleLine(value: string): string {
-  return value.replace(/\s+/g, " ").trim()
+  return sanitizeTerminalText(value, false)
+}
+
+const ANSI_ESCAPE = String.fromCharCode(0x1b)
+const ANSI_BELL = String.fromCharCode(0x07)
+const ANSI_SEQUENCE = new RegExp(
+  `${ANSI_ESCAPE}(?:\\][^${ANSI_BELL}]*(?:${ANSI_BELL}|${ANSI_ESCAPE}\\\\)|\\[[0-?]*[ -/]*[@-~])`,
+  "g"
+)
+
+function sanitizeTerminalText(value: string, preserveNewlines: boolean): string {
+  return removeTerminalControls(value.replace(ANSI_SEQUENCE, "").replace(/\r\n?/g, "\n"), preserveNewlines)
+}
+
+function removeTerminalControls(value: string, preserveNewlines: boolean): string {
+  const text: string[] = []
+
+  for (const character of value) {
+    const codePoint = character.charCodeAt(0)
+    const isLineFeed = codePoint === 0x0a
+    const isC0Control = codePoint <= 0x1f
+    const isC1Control = codePoint >= 0x7f && codePoint <= 0x9f
+    if ((isC0Control && (!preserveNewlines || !isLineFeed)) || isC1Control) continue
+    text.push(character)
+  }
+
+  return text.join("")
 }

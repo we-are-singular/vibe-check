@@ -2,15 +2,15 @@ import { createAdaptorServer } from "@hono/node-server"
 import type { Server as HttpServer } from "node:http"
 import type { AddressInfo } from "node:net"
 import type { Campaign } from "../campaign/campaign-loader.js"
-import type { InMemoryVoteStore } from "./in-memory-vote-store.js"
+import type { InMemoryFeedbackStore } from "./in-memory-feedback-store.js"
 import { createReviewApp } from "./app.js"
 
 /** Owns the POC's Node listener around the portable review HTTP application. */
 export class Server {
   private readonly server: HttpServer
 
-  constructor(campaign: Campaign, voteStore: InMemoryVoteStore) {
-    const app = createReviewApp({ campaign, voteStore })
+  constructor(campaign: Campaign, feedbackStore: InMemoryFeedbackStore) {
+    const app = createReviewApp({ campaign, feedbackStore })
 
     // The Hono Node adapter leaves listener lifecycle with the CLI host.
     this.server = createAdaptorServer({ fetch: app.fetch }) as HttpServer

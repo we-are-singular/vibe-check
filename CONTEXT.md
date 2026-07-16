@@ -24,19 +24,31 @@ A human who judges the Vibes in a Campaign.
 **Voter Session**:
 One Voter's attempt to review one Campaign.
 
+**Voting System**:
+The feedback mechanic selected by the Creator when opening a Campaign: `tinder` (the default), `stars`, or `comment`.
+
 **Verdict**:
-`pass`, `keep`, or `love`, expressing one Voter's judgment of one Vibe. `love` is the stronger positive **I love it** signal: it counts as a keep and adds a Love.
+For the `tinder` Voting System only: `pass`, `keep`, or `love`. `love` is the stronger positive **I love it** signal: it counts as a keep and adds a Love.
+
+**Star Rating**:
+For the `stars` Voting System only: one to five stars expressing a Voter's relative ranking of one Vibe.
+
+**Comment**:
+For the `comment` Voting System only: optional written feedback on one Vibe. A Voter can continue without creating a Comment.
+
+**Feedback**:
+An optional Voter response for one Vibe, using the Campaign's Voting System. A Voter can leave any Vibe unanswered.
 
 **Campaign Result**:
-The aggregate Loves and Keeps derived from recorded Voter Session Verdicts.
+The aggregate result derived from recorded Voter Session Feedback. Tinder Campaigns sort by Loves then Keeps; star Campaigns sort by average rating; comment Campaigns report comment counts without a ranking.
 
 ## Relationships
 
-- A **Creator** opens a **Campaign**.
+- A **Creator** opens a **Campaign** with one Voting System.
 - A **Campaign** contains two or more **Vibes**.
 - A **Voter** undertakes a **Voter Session**.
-- A **Voter Session** records exactly one **Verdict** per **Vibe**.
-- A **Campaign Result** sorts Vibes by Loves first, then Keeps.
+- A **Voter Session** retains at most one current **Feedback** response per **Vibe**.
+- A **Campaign Result** aggregates Feedback according to its Voting System.
 
 ## Example dialogue
 

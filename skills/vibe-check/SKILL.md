@@ -47,7 +47,7 @@ When tuning a design, vary the intended dimension deliberately—such as density
 
 ### Team decisions
 
-Represent each option as one candidate file. Ask reviewers to complete the full review before discussing results. Vibe Check reports a session summary, not reviewer identities; use it for directional feedback rather than a binding, attributable, or security-sensitive decision.
+Represent each option as one candidate file. Invite reviewers to compare the Campaign before discussing the final CLI summary. Vibe Check reports a session summary, not reviewer identities; use it for directional feedback rather than a binding, attributable, or security-sensitive decision.
 
 ## Install Vibe Check
 
@@ -63,11 +63,28 @@ npm install -g @we-are-singular/vibe-check
 vibe-check serve ./candidate-variants
 ```
 
-Open the printed review URL in a browser. Each browser session reviews one candidate at a time and provides feedback for each. Results appear after that session has reviewed every candidate.
+Open the printed review URL in a browser. Each browser session reviews one candidate at a time and can return with icon-only **Previous** or **Next** controls to change earlier feedback. Tinder verdicts advance automatically; reaching the end shows a thank-you screen even when some candidates are unanswered. Completed sessions reopen on the thank-you screen, where **Review my responses** reopens the final candidate and its earlier feedback remains editable. Aggregate feedback is available in the creator's final CLI summary.
 
-Feedback is scoped to the running session and remains in memory until Vibe Check stops. Stop gracefully with `Ctrl+C` (SIGINT) or SIGTERM to write the final session summary to stdout. A forced kill such as SIGKILL prevents that shutdown summary, but any accepted votes already emitted to an output capture remain available. Without `--output` or caller output capture, Vibe Check does not persist session data to a file.
+The question-mark button explains the current voting system in the review UI.
 
-For reliable agent retrieval, mirror every CLI lifecycle event—including each accepted vote and the final summary—to a file. `--output` replaces an existing file while stdout and stderr continue normally:
+Choose the feedback mechanic when opening the Campaign:
+
+```bash
+# Default triage: Pass, Keep, or Love.
+vibe-check serve ./candidate-variants --voting tinder
+
+# Relative ranking from one to five stars.
+vibe-check serve ./candidate-variants --voting stars
+
+# Optional written feedback; only submitted text becomes a comment.
+vibe-check serve ./candidate-variants --voting comment
+```
+
+Short aliases: `--vote` for `--voting`, `-p` for `--port`, `-o` for `--output`, and `-t` for `--tunnel`.
+
+Feedback is scoped to the running session and remains in memory until Vibe Check stops. Stop gracefully with `Ctrl+C` (SIGINT) or SIGTERM to write the final session summary to stdout. A forced kill such as SIGKILL prevents that shutdown summary, but any accepted feedback already emitted to an output capture remains available. Without `--output` or caller output capture, Vibe Check does not persist session data to a file.
+
+For reliable agent retrieval, mirror every CLI lifecycle event—including each accepted feedback response and the final summary—to a file. `--output` replaces an existing file while stdout and stderr continue normally:
 
 ```bash
 vibe-check serve ./candidate-variants --json --output vibe-check.log
@@ -79,7 +96,7 @@ The caller can instead capture the process streams directly:
 vibe-check serve ./candidate-variants --json > vibe-check.log 2>&1
 ```
 
-With `--json`, each accepted vote is an event with `type: "vote"`, `sessionId`, `vibe`, and `vote`. If a forced kill prevents the final `type: "stopped"` summary, group captured vote events by `vibe.id`: `love` increments both Love and Keep, `keep` increments Keep, and `pass` increments neither.
+With `--json`, default Tinder feedback emits a `type: "vote"` event with `eventId`, `sessionId`, `vibe`, and `vote`. Star ratings and comments emit `type: "feedback"` with `eventId`, `sessionId`, `vibe`, and a `feedback` object. Reviewers may revise feedback; derive partial state by retaining the latest event for each `(sessionId, vibe.id)` pair. An output file records each accepted feedback event once if CLI emission retries. Human-readable output uses `[sessionId] [filename] message` records and appends submitted comments after the final results table.
 
 ## Review flow
 
@@ -87,7 +104,7 @@ With `--json`, each accepted vote is an event with `type: "vote"`, `sessionId`, 
 2. Ensure every candidate addresses the same question.
 3. Open the printed review URL and review every option.
 4. Use the session output alongside qualitative feedback and constraints.
-5. Stop gracefully to recover the final summary from stdout or the `--output` file. If forced termination is unavoidable, derive a partial aggregate from the captured `vote` events.
+5. Stop gracefully to recover the final summary from stdout or the `--output` file. If forced termination is unavoidable, replay captured events with the latest response for each Vibe in a session.
 
 Use another loopback port when `4173` is unavailable:
 

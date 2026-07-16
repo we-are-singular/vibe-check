@@ -28,7 +28,7 @@ export function PreviewModePicker({ onChange, value }: PreviewModePickerProps): 
     <fieldset className="flex gap-1 rounded-control border border-border bg-canvas p-1" aria-label="Preview width">
       <legend className="sr-only">Preview width</legend>
       {PREVIEW_MODES.map(mode => {
-        const { Icon, label, title } = modeDetails[mode]
+        const { Icon, title } = modeDetails[mode]
         const id = `preview-width-${mode}`
 
         return (
@@ -49,7 +49,6 @@ export function PreviewModePicker({ onChange, value }: PreviewModePickerProps): 
               title={title}
             >
               <Icon aria-hidden className="size-4 shrink-0" strokeWidth={1.75} />
-              <span className="hidden sm:inline">{label}</span>
             </label>
           </div>
         )
