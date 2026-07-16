@@ -67,20 +67,45 @@ Open the printed review URL in a browser. Each browser session reviews one candi
 
 The question-mark button explains the current voting system in the review UI.
 
-Choose the feedback mechanic when opening the Campaign:
+## Choose a voting system
+
+Set the feedback mechanic when opening the Campaign. Use `--voting`; `--vote` is its short alias. The choice controls both the reviewer UI and the creator's final CLI summary.
+
+### `tinder` — fast triage
+
+Use the default system for a broad set of design directions or early-stage ideas where reviewers should quickly decide whether to discard, retain, or strongly endorse each option.
+
+- **Pass** removes a candidate from consideration.
+- **Keep** retains a candidate.
+- **Love** is a stronger positive signal and also counts as a Keep.
+- The final summary ranks Vibes by Loves, then Keeps.
 
 ```bash
-# Default triage: Pass, Keep, or Love.
+# Quickly narrow a set of visual directions.
 vibe-check serve ./candidate-variants --voting tinder
+```
 
-# Relative ranking from one to five stars.
-vibe-check serve ./candidate-variants --voting stars
+### `stars` — relative ranking
 
-# Optional written feedback; only submitted text becomes a comment.
+Use stars when comparing a small set of close alternatives and the strength of preference matters. Reviewers assign one to five stars; the final summary ranks Vibes by average rating, then rating count.
+
+```bash
+# Use the --vote alias when ranking close copy or design candidates.
+vibe-check serve ./candidate-variants --vote stars
+```
+
+### `comment` — qualitative feedback
+
+Use comments for copy, proposals, information architecture, or any decision that needs an explanation instead of a forced rank. Comments are optional: reviewers can submit text or continue without a response. The final summary reports comment counts and lists submitted comments.
+
+```bash
+# Collect written observations without requiring a score.
 vibe-check serve ./candidate-variants --voting comment
 ```
 
-Short aliases: `--vote` for `--voting`, `-p` for `--port`, `-o` for `--output`, and `-t` for `--tunnel`.
+Every voting system permits unanswered candidates. Reviewers can return with **Previous** or **Next** controls and revise recorded feedback before the session ends.
+
+Other option aliases: `-p` for `--port`, `-o` for `--output`, and `-t` for `--tunnel`.
 
 Feedback is scoped to the running session and remains in memory until Vibe Check stops. Stop gracefully with `Ctrl+C` (SIGINT) or SIGTERM to write the final session summary to stdout. A forced kill such as SIGKILL prevents that shutdown summary, but any accepted feedback already emitted to an output capture remains available. Without `--output` or caller output capture, Vibe Check does not persist session data to a file.
 

@@ -15,10 +15,23 @@ export class ServeCommand extends VibeCheckCommand {
 
   static usage = Command.Usage({
     description: "Serve self-contained HTML or Markdown files for shared feedback",
-    details:
-      "Requires two or more direct-child `.html`, `.md`, or `.markdown` candidates; HTML and Markdown may be mixed, files are reviewed in lexical filename order, and HTML must be self-contained. Starts a review URL on your machine; `--tunnel` shares it. Markdown frontmatter renders as metadata. Feedback exists only while this process runs. Stop gracefully with SIGINT or SIGTERM to print the final session summary; `--output` mirrors lifecycle output to a file. Cloudflare requires `cloudflared`; ngrok requires an installed, authenticated ngrok client.",
+    details: `
+      Requires two or more direct-child \`.html\`, \`.md\`, or \`.markdown\` candidates; HTML and Markdown may be mixed, files are reviewed in lexical filename order, and HTML must be self-contained. Starts a review URL on your machine; \`--tunnel\` shares it. Markdown frontmatter renders as metadata. Feedback exists only while this process runs. Stop gracefully with SIGINT or SIGTERM to print the final session summary; \`--output\` mirrors lifecycle output to a file. Cloudflare requires \`cloudflared\`; ngrok requires an installed, authenticated ngrok client.
+
+      Voting systems
+
+      \`tinder\` (default): Fast triage for a broad set of candidates. Reviewers choose Pass, Keep, or Love; results rank Loves, then Keeps.
+
+      \`stars\`: Relative ranking for a small set of alternatives when the average strength of preference matters. Reviewers choose one to five stars; results rank average rating.
+
+      \`comment\`: Qualitative feedback for copy, proposals, or work that needs explanation rather than a forced rank. Reviewers can submit text or continue without a response; results report comment counts and the final summary lists submitted comments.
+
+      Select a system with \`--voting <tinder|stars|comment>\` or \`--vote <system>\`. Every system permits unanswered candidates; reviewers can revisit and change recorded feedback before the session ends.
+    `,
     examples: [
-      ["Start a feedback session", "vibe-check serve ./candidate-variants"],
+      ["Start a default Tinder triage", "vibe-check serve ./candidate-variants --voting tinder"],
+      ["Rank close alternatives with stars", "vibe-check serve ./candidate-variants --vote stars"],
+      ["Collect qualitative written feedback", "vibe-check serve ./candidate-variants --voting comment"],
       ["Use another port", "vibe-check serve ./candidate-variants --port 4214"],
       ["Emit JSON lifecycle events", "vibe-check serve ./candidate-variants --json"],
       ["Write lifecycle output to a file", "vibe-check serve ./candidate-variants --json --output vibe-check.log"],
