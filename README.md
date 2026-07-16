@@ -4,7 +4,7 @@ Share feedback on static HTML and Markdown alternatives with an agent, a teammat
 
 ## Install
 
-Vibe Check runs through npm on Windows, macOS, and Linux. Requires Node.js 22 or newer.
+Vibe Check runs through npm on Windows, macOS, and Linux. Requires Node.js 22 or newer and npm 11 or newer.
 
 ```bash
 npm install -g @we-are-singular/vibe-check
@@ -85,12 +85,13 @@ vibe-check skill --install
 
 ## Development
 
-Requirements: Node.js 22+ and npm 11+.
+Requirements: Node.js 22+ and npm 11.18.0.
 
 ```bash
 npm install
 npm run typecheck
 npm test
+npm run test:coverage
 npm run build
 ```
 
@@ -106,7 +107,7 @@ This is rebuild-on-save, not HMR. The CLI always serves the current `dist/viewer
 
 - `apps/cli` — the published Clipanion CLI, Hono review server, React viewer, and tunnel providers.
 - `demo` — example candidate directories.
-- `PRD.md` and `CONTEXT.md` — product requirements and canonical domain language.
+- `CONTEXT.md` — canonical domain language.
 
 ## Help
 

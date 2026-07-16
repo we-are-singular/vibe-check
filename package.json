@@ -8,7 +8,7 @@
   "type": "module",
   "scripts": {
     "build": "npm run build --workspace=@we-are-singular/vibe-check",
-    "check": "npm run typecheck && npm run lint && npm test && npm run build",
+    "check": "npm run format && npm run typecheck && npm run lint && npm test && npm run build",
     "dev": "npm run dev --workspace=@we-are-singular/vibe-check",
     "format": "oxfmt --check .",
     "format:fix": "oxfmt .",
@@ -17,6 +17,7 @@
     "prepare": "husky",
     "release": "npm run release --workspace=@we-are-singular/vibe-check",
     "test": "npm run test --workspace=@we-are-singular/vibe-check",
+    "test:coverage": "npm run test:coverage --workspace=@we-are-singular/vibe-check",
     "typecheck": "npm run typecheck --workspace=@we-are-singular/vibe-check"
   },
   "devDependencies": {
