@@ -35,6 +35,8 @@ candidate-variants/
 - Files are reviewed in lexical filename order. Prefix filenames with numbers when their order matters.
 - Name files for the decision being made, not for implementation details.
 
+- On Windows, paths written as `/c/...` by MSYS or Git Bash are accepted alongside `C:/...` paths.
+
 ### Copy variants
 
 Use Markdown for copy, messaging, information architecture, or lightweight campaign alternatives. Keep each candidate focused on one coherent direction. Include the full context a reviewer needs to evaluate it: headline, supporting copy, CTA, and any relevant hierarchy.
@@ -107,12 +109,16 @@ Every voting system permits unanswered candidates. Reviewers can return with **P
 
 Other option aliases: `-p` for `--port`, `-o` for `--output`, and `-t` for `--tunnel`.
 
-Feedback is scoped to the running session and remains in memory until Vibe Check stops. Stop gracefully with `Ctrl+C` (SIGINT) or SIGTERM to write the final session summary to stdout. A forced kill such as SIGKILL prevents that shutdown summary, but any accepted feedback already emitted to an output capture remains available. Without `--output` or caller output capture, Vibe Check does not persist session data to a file.
+Feedback is scoped to the running session and remains in memory until Vibe Check stops. Stop gracefully with `Ctrl+C` (SIGINT) or SIGTERM: Vibe Check writes the final session summary and exits successfully with status `0`. A forced termination such as SIGKILL does not run shutdown handlers and cannot write that final summary; accepted feedback already mirrored to an output capture remains available. Without `--output` or caller output capture, Vibe Check does not persist session data to a file.
 
 For reliable agent retrieval, mirror every CLI lifecycle event—including each accepted feedback response and the final summary—to a file. `--output` replaces an existing file while stdout and stderr continue normally:
 
 ```bash
-vibe-check serve ./candidate-variants --json --output vibe-check.log
+# JSON Lines lifecycle events; choose a .jsonl extension to make the format clear.
+vibe-check serve ./candidate-variants --json --output results.jsonl
+
+# Human-readable lifecycle records and final summary.
+vibe-check serve ./candidate-variants --output results.txt
 ```
 
 The caller can instead capture the process streams directly:
@@ -121,7 +127,7 @@ The caller can instead capture the process streams directly:
 vibe-check serve ./candidate-variants --json > vibe-check.log 2>&1
 ```
 
-With `--json`, default Tinder feedback emits a `type: "vote"` event with `eventId`, `sessionId`, `vibe`, and `vote`. Star ratings and comments emit `type: "feedback"` with `eventId`, `sessionId`, `vibe`, and a `feedback` object. Reviewers may revise feedback; derive partial state by retaining the latest event for each `(sessionId, vibe.id)` pair. An output file records each accepted feedback event once if CLI emission retries. Human-readable output uses `[sessionId] [filename] message` records and appends submitted comments after the final results table.
+With `--json`, default Tinder feedback emits a `type: "vote"` event with `eventId`, `sessionId`, `vibe`, and `vote`. Star ratings and comments emit `type: "feedback"` with `eventId`, `sessionId`, `vibe`, and a `feedback` object. Reviewers may revise feedback; derive partial state by retaining the latest event for each `(sessionId, vibe.id)` pair. `--json --output` writes those events as JSON Lines; without `--json`, `--output` writes the same lifecycle information as human-readable text. An output file records each accepted feedback event once if CLI emission retries. Human-readable output uses `[sessionId] [filename] message` records and appends submitted comments after the final results table.
 
 ## Review flow
 

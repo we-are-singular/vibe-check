@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
 // @vitest-environment-options {"url":"http://localhost"}
 
-import { cleanup, render, screen } from "@testing-library/react"
+import { cleanup, render, screen, within } from "@testing-library/react"
 import { userEvent } from "@testing-library/user-event"
 
 import { ReviewApiClient, type Campaign, type ReviewSession } from "../../../src/review/viewer/api.js"
@@ -127,8 +127,20 @@ describe("ViewerApp", () => {
 
     cleanup()
     render(<ViewerApp api={api} />)
-    await screen.findByRole("button", { name: "Review my responses" })
-    await user.click(screen.getByRole("button", { name: "Review my responses" }))
+
+    const header = screen.getByRole("banner")
+    const reviewResponses = await within(header).findByRole("button", { name: "Review my responses" })
+    const thankYouCard = screen.getByText("Keep the good vibes moving").closest("section")
+    if (!thankYouCard) throw new Error("Missing thank-you card.")
+
+    expect(reviewResponses).not.toBeNull()
+    expect(within(header).getByRole("button", { name: "How this review works" })).not.toBeNull()
+    expect(within(header).queryByRole("button", { name: "Previous Vibe" })).toBeNull()
+    expect(within(header).queryByRole("button", { name: "Next Vibe" })).toBeNull()
+    expect(within(header).queryByRole("button", { name: "Finish review" })).toBeNull()
+    expect(within(thankYouCard).queryByRole("button", { name: "Review my responses" })).toBeNull()
+
+    await user.click(reviewResponses)
     await screen.findByTitle("Beacon")
   })
 

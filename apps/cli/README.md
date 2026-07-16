@@ -31,7 +31,7 @@ vibe-check serve ./candidate-variants
 
 Open the printed review URL. It starts on your machine and can be shared with `--tunnel`. The default `tinder` mechanic offers **Pass**, **Keep**, and **Love**; selecting one advances to the next candidate. Use the icon-only **Previous** and **Next** controls to revisit candidates; previously recorded feedback stays selected and can be changed. Reaching the end shows a thank-you screen; the Campaign owner receives aggregate feedback in the final CLI session summary.
 
-Feedback is scoped to the running session and stays in memory until the server stops. Completed sessions reopen on their thank-you screen; use **Review my responses** to revisit the final candidate and revise earlier feedback. Stop gracefully with `Ctrl+C` (SIGINT) or SIGTERM; Vibe Check then writes the final session summary to stdout. A forced kill such as SIGKILL prevents that shutdown summary, but any accepted feedback already emitted to an output capture remains available. Without `--output` or caller output capture, Vibe Check does not persist session data to a file.
+Feedback is scoped to the running session and stays in memory until the server stops. Completed sessions reopen on their thank-you screen; **Review my responses** appears in the top-right header next to the help button and reopens the last candidate. Stop gracefully with `Ctrl+C` (SIGINT) or SIGTERM: Vibe Check writes the final summary and exits with status `0`. A forced termination such as SIGKILL cannot write that shutdown summary, but accepted feedback already emitted to an output capture remains available. Without `--output` or caller output capture, Vibe Check does not persist session data to a file.
 
 ## Campaign files
 
@@ -39,6 +39,7 @@ Feedback is scoped to the running session and stays in memory until the server s
 - HTML and Markdown files may be mixed.
 - Files are reviewed in lexical filename order. Prefix names with numbers, such as `01-home.html` and `02-mobile.md`, when order matters.
 - HTML candidates should be self-contained. Vibe Check serves each file as an isolated preview document; it does not serve adjacent assets such as images, style sheets, or scripts.
+- On Windows, MSYS or Git Bash paths written as `/c/...` are accepted alongside `C:/...`.
 
 ## Options
 
@@ -71,10 +72,11 @@ Emit newline-delimited JSON lifecycle events for automation:
 vibe-check serve ./candidate-variants --json
 ```
 
-For reliable agent or process retrieval, mirror every CLI lifecycle event—including each accepted feedback response and the final summary—to a file. `--output` replaces an existing file while stdout and stderr continue normally:
+For reliable agent or process retrieval, mirror every CLI lifecycle event—including each accepted feedback response and the final summary—to a file. `--output` replaces an existing file while stdout and stderr continue normally. With `--json`, the file is JSON Lines; without `--json`, it is human-readable text:
 
 ```bash
-vibe-check serve ./candidate-variants --json --output vibe-check.log
+vibe-check serve ./candidate-variants --json --output results.jsonl
+vibe-check serve ./candidate-variants --output results.txt
 ```
 
 The caller can instead capture the process streams directly:
@@ -83,7 +85,7 @@ The caller can instead capture the process streams directly:
 vibe-check serve ./candidate-variants --json > vibe-check.log 2>&1
 ```
 
-With `--json`, default Tinder feedback emits `type: "vote"` with `eventId`, `sessionId`, `vibe`, and `vote`. Star ratings and comments emit `type: "feedback"` with `eventId`, `sessionId`, `vibe`, and a `feedback` object. Reviewers may change their feedback; when replaying captured events, keep the latest event for each `(sessionId, vibe.id)` pair. An output file records each accepted feedback event once if CLI emission retries. In human-readable mode, accepted feedback uses `[sessionId] [filename] message` records; final comment summaries list each submitted comment after the results table.
+With `--json`, default Tinder feedback emits `type: "vote"` with `eventId`, `sessionId`, `vibe`, and `vote`. Star ratings and comments emit `type: "feedback"` with `eventId`, `sessionId`, `vibe`, and a `feedback` object. Reviewers may change their feedback; when replaying captured events, keep the latest event for each `(sessionId, vibe.id)` pair. An output file records each accepted feedback event once if CLI emission retries. In human-readable mode, accepted feedback uses `[sessionId] [filename] message` records; final comment summaries list each submitted comment after the results table. For Tinder summaries, **Kept or loved** includes every Keep and Love response.
 
 Share a temporary public review link through an installed tunnel provider:
 

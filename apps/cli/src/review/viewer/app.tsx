@@ -197,6 +197,7 @@ export function ViewerApp({ api = defaultApi }: ViewerAppProps): React.JSX.Eleme
   }
   const announcement = getAnnouncement(viewerState, isSaving, saveError)
   const isReviewing = viewerState.kind === "reviewing"
+  const isComplete = viewerState.kind === "complete"
   const title =
     viewerState.kind === "reviewing" || viewerState.kind === "complete" ? viewerState.campaign.title : "Vibe Check"
   const activeVibe = isReviewing ? viewerState.campaign.vibes[currentIndex] : undefined
@@ -240,6 +241,11 @@ export function ViewerApp({ api = defaultApi }: ViewerAppProps): React.JSX.Eleme
               </button>
             </div>
           )}
+          {isComplete && (
+            <button className="review-responses-button" onClick={editResponses} type="button">
+              Review my responses
+            </button>
+          )}
           {isReviewing && activeVibe?.kind === "html" && (
             <PreviewModePicker onChange={changePreviewMode} value={previewMode} />
           )}
@@ -260,9 +266,7 @@ export function ViewerApp({ api = defaultApi }: ViewerAppProps): React.JSX.Eleme
         {viewerState.kind === "loading" && <LoadingState />}
         {viewerState.kind === "error" && <ErrorState error={viewerState.error} onRetry={retry} />}
         {isReviewing && activeVibe && <ReviewState isSaving={isSaving} previewMode={previewMode} vibe={activeVibe} />}
-        {(viewerState.kind === "complete" || viewerState.kind === "thank-you") && (
-          <ThankYouState onEdit={viewerState.kind === "complete" ? editResponses : undefined} />
-        )}
+        {(viewerState.kind === "complete" || viewerState.kind === "thank-you") && <ThankYouState />}
       </section>
 
       {isReviewing && activeVibe && (
@@ -349,7 +353,7 @@ function ReviewState({
   )
 }
 
-function ThankYouState({ onEdit }: { onEdit?: () => void }): React.JSX.Element {
+function ThankYouState(): React.JSX.Element {
   return (
     <div className="grid h-full place-items-center overflow-auto bg-canvas p-4 sm:p-6">
       <div className="w-full max-w-2xl text-center">
@@ -383,11 +387,6 @@ function ThankYouState({ onEdit }: { onEdit?: () => void }): React.JSX.Element {
             Star Vibe Check on GitHub
             <ArrowUpRight aria-hidden className="size-4" />
           </a>
-          {onEdit && (
-            <button className="retry-button mt-5" onClick={onEdit} type="button">
-              Review my responses
-            </button>
-          )}
         </section>
       </div>
     </div>

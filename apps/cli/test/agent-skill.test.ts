@@ -13,8 +13,6 @@ describe("AgentSkill", () => {
     expect(contents).toContain("### Cloudflare Quick Tunnel")
     expect(contents).toContain("### ngrok")
     expect(contents).toContain("npm install -g @we-are-singular/vibe-check")
-    expect(contents).toContain("--json --output vibe-check.log")
-    expect(contents).toContain("any accepted feedback already emitted to an output capture remains available.")
     expect(contents).toContain("--vote stars")
     expect(contents).toContain("--voting comment")
     expect(contents).toContain("## Choose a voting system")
@@ -22,6 +20,13 @@ describe("AgentSkill", () => {
     expect(contents).toContain("### `stars` — relative ranking")
     expect(contents).toContain("### `comment` — qualitative feedback")
     expect(contents).toContain("--vote stars")
+    expect(contents).toContain("exits successfully with status `0`")
+    expect(contents).toContain("SIGKILL does not run shutdown handlers")
+    expect(contents).toContain("--json --output results.jsonl")
+    expect(contents).toContain(
+      "without `--json`, `--output` writes the same lifecycle information as human-readable text"
+    )
+    expect(contents).toContain("paths written as `/c/...` by MSYS or Git Bash are accepted")
   })
 })
 

@@ -16,7 +16,7 @@ export class ServeCommand extends VibeCheckCommand {
   static usage = Command.Usage({
     description: "Serve self-contained HTML or Markdown files for shared feedback",
     details: `
-      Requires two or more direct-child \`.html\`, \`.md\`, or \`.markdown\` candidates; HTML and Markdown may be mixed, files are reviewed in lexical filename order, and HTML must be self-contained. Starts a review URL on your machine; \`--tunnel\` shares it. Markdown frontmatter renders as metadata. Feedback exists only while this process runs. Stop gracefully with SIGINT or SIGTERM to print the final session summary; \`--output\` mirrors lifecycle output to a file. Cloudflare requires \`cloudflared\`; ngrok requires an installed, authenticated ngrok client.
+      Requires two or more direct-child \`.html\`, \`.md\`, or \`.markdown\` candidates; HTML and Markdown may be mixed, files are reviewed in lexical filename order, and HTML must be self-contained. Starts a review URL on your machine; \`--tunnel\` shares it. Markdown frontmatter renders as metadata. Feedback exists only while this process runs. SIGINT or SIGTERM requests graceful termination: Vibe Check closes the session, prints its final summary, and exits successfully. A forced kill such as SIGKILL may stop immediately without a summary. \`--output\` mirrors lifecycle output to a file as JSON Lines with \`--json\`, or as human-readable text otherwise. Cloudflare requires \`cloudflared\`; ngrok requires an installed, authenticated ngrok client.
 
       Voting systems
 
@@ -34,7 +34,8 @@ export class ServeCommand extends VibeCheckCommand {
       ["Collect qualitative written feedback", "vibe-check serve ./candidate-variants --voting comment"],
       ["Use another port", "vibe-check serve ./candidate-variants --port 4214"],
       ["Emit JSON lifecycle events", "vibe-check serve ./candidate-variants --json"],
-      ["Write lifecycle output to a file", "vibe-check serve ./candidate-variants --json --output vibe-check.log"],
+      ["Write JSON Lines lifecycle output", "vibe-check serve ./candidate-variants --json --output results.jsonl"],
+      ["Write human-readable lifecycle output", "vibe-check serve ./candidate-variants --output results.txt"],
       ["Share through Cloudflare", "vibe-check serve ./candidate-variants --tunnel cloudflare"],
     ],
   })
@@ -47,7 +48,8 @@ export class ServeCommand extends VibeCheckCommand {
   })
 
   outputPath = Option.String("--output,-o", {
-    description: "Mirror CLI lifecycle output to a file (replaces an existing file)",
+    description:
+      "Mirror lifecycle output to a file: JSON Lines with --json, human-readable text otherwise (replaces an existing file)",
     required: false,
   })
 
@@ -144,11 +146,12 @@ export class ServeCommand extends VibeCheckCommand {
         },
       })
 
-      const { promise, reject, resolve } = Promise.withResolvers<void>()
+      const { promise, resolve } = Promise.withResolvers<void>()
       const stop = () => {
         process.off("SIGINT", stop)
         process.off("SIGTERM", stop)
-        void stopResources().then(resolve, reject)
+        // A requested graceful shutdown always reaches the final summary and success exit path.
+        void stopResources().finally(resolve)
       }
 
       process.once("SIGINT", stop)

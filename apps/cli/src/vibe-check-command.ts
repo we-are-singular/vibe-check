@@ -168,7 +168,7 @@ function getResultTable(results: readonly ResultRow[]): {
   }
 
   return {
-    headers: ["Vibe", "Loves", "Keeps"],
+    headers: ["Vibe", "Loves", "Kept or loved"],
     rows: results.map(result => {
       if ("votingSystem" in result) throw new Error("Mixed voting systems are not supported.")
       return [asSingleLine(result.label), formatLoveCount(result.loveCount), String(result.keepCount)]

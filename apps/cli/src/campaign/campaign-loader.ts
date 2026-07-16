@@ -18,7 +18,7 @@ export class CampaignLoader {
   constructor(private readonly renderers: readonly VibeRenderer[]) {}
 
   async load(directory: string): Promise<Campaign> {
-    const absoluteDirectory = resolve(directory)
+    const absoluteDirectory = resolve(normalizeCampaignDirectoryPath(directory))
     const entries = await this.readDirectory(absoluteDirectory)
     const candidateNames = entries
       .filter(entry => entry.isFile() && this.findRenderer(entry.name) !== undefined)
@@ -74,4 +74,15 @@ export class CampaignLoader {
       throw new Error(`Cannot read ${directory}: ${message}`, { cause: error })
     }
   }
+}
+
+/**
+ * Converts the MSYS drive-root form that Node does not interpret as a Windows
+ * drive path. Other path forms remain the caller's responsibility.
+ */
+export function normalizeCampaignDirectoryPath(directory: string, platform = process.platform): string {
+  if (platform !== "win32") return directory
+
+  const msysDrivePath = /^\/([a-zA-Z])\/(.*)$/.exec(directory)
+  return msysDrivePath === null ? directory : `${msysDrivePath[1]?.toUpperCase()}:/${msysDrivePath[2]}`
 }
