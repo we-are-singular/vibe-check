@@ -15,11 +15,12 @@ export class ServeCommand extends VibeCheckCommand {
   static usage = Command.Usage({
     description: "Serve self-contained HTML or Markdown files for shared feedback",
     details:
-      "Requires two or more direct-child `.html`, `.md`, or `.markdown` candidates; HTML and Markdown may be mixed, files are reviewed in lexical filename order, and HTML must be self-contained. Starts a review URL on your machine; `--tunnel` shares it. Markdown frontmatter renders as metadata. Feedback exists only while this process runs. Cloudflare requires `cloudflared`; ngrok requires an installed, authenticated ngrok client.",
+      "Requires two or more direct-child `.html`, `.md`, or `.markdown` candidates; HTML and Markdown may be mixed, files are reviewed in lexical filename order, and HTML must be self-contained. Starts a review URL on your machine; `--tunnel` shares it. Markdown frontmatter renders as metadata. Feedback exists only while this process runs. Stop gracefully with SIGINT or SIGTERM to print the final session summary; `--output` mirrors lifecycle output to a file. Cloudflare requires `cloudflared`; ngrok requires an installed, authenticated ngrok client.",
     examples: [
       ["Start a feedback session", "vibe-check serve ./candidate-variants"],
       ["Use another port", "vibe-check serve ./candidate-variants --port 4214"],
       ["Emit JSON lifecycle events", "vibe-check serve ./candidate-variants --json"],
+      ["Write lifecycle output to a file", "vibe-check serve ./candidate-variants --json --output vibe-check.log"],
       ["Share through Cloudflare", "vibe-check serve ./candidate-variants --tunnel cloudflare"],
     ],
   })
@@ -31,21 +32,21 @@ export class ServeCommand extends VibeCheckCommand {
     required: false,
   })
 
+  outputPath = Option.String("--output", {
+    description: "Mirror CLI lifecycle output to a file (replaces an existing file)",
+    required: false,
+  })
+
   tunnel = Option.String("--tunnel", {
     description: `Temporary public tunnel provider (${TUNNEL_PROVIDERS.join(", ")}; see details for prerequisites)`,
     required: false,
   })
 
   async execute(): Promise<number> {
-    const port = parsePort(this.port ?? "4173")
-    if (port === null) {
-      this.output({ type: "error", message: "--port must be a base-10 integer from 1 through 65535." })
-      return 1
-    }
-
-    const tunnelProvider = TUNNEL_PROVIDERS.find(provider => provider === this.tunnel)
-    if (this.tunnel !== undefined && tunnelProvider === undefined) {
-      this.output({ type: "error", message: `--tunnel must be one of: ${TUNNEL_PROVIDERS.join(", ")}.` })
+    try {
+      if (this.outputPath !== undefined) await this.openOutputFile(this.outputPath)
+    } catch (error) {
+      await this.output({ type: "error", message: `unable to create output file: ${getErrorMessage(error)}` })
       return 1
     }
 
@@ -62,15 +63,27 @@ export class ServeCommand extends VibeCheckCommand {
     }
 
     try {
+      const port = parsePort(this.port ?? "4173")
+      if (port === null) {
+        await this.output({ type: "error", message: "--port must be a base-10 integer from 1 through 65535." })
+        return 1
+      }
+
+      const tunnelProvider = TUNNEL_PROVIDERS.find(provider => provider === this.tunnel)
+      if (this.tunnel !== undefined && tunnelProvider === undefined) {
+        await this.output({ type: "error", message: `--tunnel must be one of: ${TUNNEL_PROVIDERS.join(", ")}.` })
+        return 1
+      }
+
       const campaign = await new CampaignLoader([new HtmlFragmentRenderer(), new MarkdownRenderer()]).load(
         this.directory
       )
-      const voteStore = new InMemoryVoteStore(campaign.vibes)
+      const voteStore = new InMemoryVoteStore(campaign.vibes, vote => this.output({ type: "vote", ...vote }))
       server = new Server(campaign, voteStore)
       const reviewUrl = (await server.start(port)).url
       activeTunnel = tunnelProvider === undefined ? undefined : await startTunnel(tunnelProvider, reviewUrl)
 
-      this.output({
+      await this.output({
         type: "started",
         campaign: {
           directory: campaign.directory,
@@ -79,8 +92,8 @@ export class ServeCommand extends VibeCheckCommand {
         },
         hint:
           activeTunnel === undefined
-            ? "Review is ready. Press Ctrl+C to stop; feedback is kept only for this running session."
-            : `Shared feedback is available through ${tunnelProvider}: anyone with the public URL can participate. Press Ctrl+C to stop.`,
+            ? "Review is ready. Press Ctrl+C to stop and print the final session summary."
+            : `Shared feedback is available through ${tunnelProvider}: anyone with the public URL can participate. Press Ctrl+C to stop and print the final session summary.`,
         urls: {
           apiResults: `${reviewUrl}/api/results?sessionId=<session-id>`,
           public: activeTunnel?.publicUrl,
@@ -100,7 +113,7 @@ export class ServeCommand extends VibeCheckCommand {
       process.once("SIGTERM", stop)
       await promise
 
-      this.output({
+      await this.output({
         type: "stopped",
         hint:
           tunnelProvider === undefined
@@ -111,8 +124,10 @@ export class ServeCommand extends VibeCheckCommand {
       return 0
     } catch (error) {
       await stopResources()
-      this.output({ type: "error", message: `unable to serve campaign: ${getErrorMessage(error)}` })
+      await this.output({ type: "error", message: `unable to serve campaign: ${getErrorMessage(error)}` })
       return 1
+    } finally {
+      await this.closeOutputFile()
     }
   }
 }

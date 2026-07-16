@@ -10,6 +10,14 @@
     "es2024": true,
     "node": true
   },
+  "overrides": [
+    {
+      "files": ["apps/cli/test/**/*.test.ts", "apps/cli/test/**/*.test.tsx"],
+      "env": {
+        "vitest": true
+      }
+    }
+  ],
   "ignorePatterns": ["apps/cli/dist/**"],
   "rules": {
     "eslint/no-unused-vars": "off",

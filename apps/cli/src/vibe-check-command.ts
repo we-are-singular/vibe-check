@@ -1,5 +1,6 @@
 import { Command, Option } from "clipanion"
-import type { ResultRow } from "./types.js"
+import { CliOutputFile } from "./cli-output-file.js"
+import type { ResultRow, Vote } from "./types.js"
 
 /** JSON lines emitted by CLI commands for people and automation. */
 export type CommandOutput =
@@ -24,6 +25,16 @@ export type CommandOutput =
       type: "stopped"
     }
   | {
+      sessionId: string
+      type: "vote"
+      vibe: {
+        file: string
+        id: string
+        label: string
+      }
+      vote: Vote
+    }
+  | {
       message: string
       type: "error"
     }
@@ -31,13 +42,37 @@ export type CommandOutput =
 /** Provides human-readable text and JSON Lines lifecycle output for CLI commands. */
 export abstract class VibeCheckCommand extends Command {
   json = Option.Boolean("--json", {
-    description: "Emit newline-delimited JSON lifecycle events.",
+    description: "Emit newline-delimited JSON lifecycle events, including accepted votes.",
     required: false,
   })
 
-  protected output(event: CommandOutput): void {
+  private outputFile: CliOutputFile | undefined
+
+  /** Starts mirroring rendered lifecycle events to a fresh file. */
+  protected async openOutputFile(path: string): Promise<void> {
+    this.outputFile = await CliOutputFile.create(path)
+  }
+
+  /** Closes the optional output file after the final lifecycle event has been written. */
+  protected async closeOutputFile(): Promise<void> {
+    const outputFile = this.outputFile
+    this.outputFile = undefined
+    await outputFile?.close()
+  }
+
+  protected async output(event: CommandOutput): Promise<void> {
     const stream = event.type === "error" ? this.context.stderr : this.context.stdout
-    stream.write(this.json ? `${JSON.stringify(event)}\n` : formatTextOutput(event))
+    const rendered = this.json ? `${JSON.stringify(event)}\n` : formatTextOutput(event)
+
+    try {
+      // Persist before emitting so accepted votes survive a later forced process kill.
+      await this.outputFile?.append(rendered)
+    } catch (error) {
+      await this.closeOutputFile().catch(() => undefined)
+      throw error
+    }
+
+    stream.write(rendered)
   }
 }
 
@@ -60,6 +95,8 @@ function formatTextOutput(event: CommandOutput): string {
     }
     case "stopped":
       return `${formatResultTable(event.results)}\n\n${event.hint}\n`
+    case "vote":
+      return `Recorded ${event.vote} vote for ${asSingleLine(event.vibe.label)} (${event.vibe.file}) in session ${event.sessionId}.\n`
     case "error":
       return `error: ${event.message}\n`
   }

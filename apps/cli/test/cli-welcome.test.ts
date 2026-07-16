@@ -1,4 +1,3 @@
-import { describe, expect, it } from "vitest"
 import { formatWelcomeScreen } from "../src/cli-welcome.js"
 
 describe("formatWelcomeScreen", () => {
@@ -9,6 +8,7 @@ describe("formatWelcomeScreen", () => {
     expect(output).toContain("Examples")
     expect(output).toContain("For agents")
     expect(output).toContain("  Run `vibe-check skill` to understand the tool.")
+    expect(output).toContain("vibe-check serve ./candidate-variants --json --output vibe-check.log")
     expect(output).not.toContain("░██")
   })
 
@@ -26,7 +26,7 @@ describe("formatWelcomeScreen", () => {
 
     expect(output).toContain("░██")
     expect(output).toContain("For agents")
-    expect(output).toContain("Install Skill: npx skills add we-are-singular/vibe-check --skill vibe-check")
+    expect(output).toContain("Install Skill: npx skills add we-are-singular/vibe-check")
   })
 
   it("honors the always and never banner overrides", () => {

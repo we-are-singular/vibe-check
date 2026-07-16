@@ -49,6 +49,14 @@ When tuning a design, vary the intended dimension deliberately—such as density
 
 Represent each option as one candidate file. Ask reviewers to complete the full review before discussing results. Vibe Check reports a session summary, not reviewer identities; use it for directional feedback rather than a binding, attributable, or security-sensitive decision.
 
+## Install Vibe Check
+
+This skill runs the `vibe-check` command. Install the CLI before starting a review session:
+
+```bash
+npm install -g @we-are-singular/vibe-check
+```
+
 ## Run a feedback session
 
 ```bash
@@ -57,7 +65,21 @@ vibe-check serve ./candidate-variants
 
 Open the printed review URL in a browser. Each browser session reviews one candidate at a time and provides feedback for each. Results appear after that session has reviewed every candidate.
 
-Feedback is scoped to the running session and remains in memory until Vibe Check stops. Press `Ctrl+C` to print the session summary; the session data is not persisted.
+Feedback is scoped to the running session and remains in memory until Vibe Check stops. Stop gracefully with `Ctrl+C` (SIGINT) or SIGTERM to write the final session summary to stdout. A forced kill such as SIGKILL prevents that shutdown summary, but any accepted votes already emitted to an output capture remain available. Without `--output` or caller output capture, Vibe Check does not persist session data to a file.
+
+For reliable agent retrieval, mirror every CLI lifecycle event—including each accepted vote and the final summary—to a file. `--output` replaces an existing file while stdout and stderr continue normally:
+
+```bash
+vibe-check serve ./candidate-variants --json --output vibe-check.log
+```
+
+The caller can instead capture the process streams directly:
+
+```bash
+vibe-check serve ./candidate-variants --json > vibe-check.log 2>&1
+```
+
+With `--json`, each accepted vote is an event with `type: "vote"`, `sessionId`, `vibe`, and `vote`. If a forced kill prevents the final `type: "stopped"` summary, group captured vote events by `vibe.id`: `love` increments both Love and Keep, `keep` increments Keep, and `pass` increments neither.
 
 ## Review flow
 
@@ -65,7 +87,7 @@ Feedback is scoped to the running session and remains in memory until Vibe Check
 2. Ensure every candidate addresses the same question.
 3. Open the printed review URL and review every option.
 4. Use the session output alongside qualitative feedback and constraints.
-5. Stop the process when the session ends; its feedback cannot be recovered.
+5. Stop gracefully to recover the final summary from stdout or the `--output` file. If forced termination is unavoidable, derive a partial aggregate from the captured `vote` events.
 
 Use another loopback port when `4173` is unavailable:
 

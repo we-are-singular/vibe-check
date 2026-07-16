@@ -116,7 +116,7 @@ export function createReviewApp({
 
     try {
       context.header("cache-control", "no-store")
-      return context.json(voteStore.recordVote(body.sessionId, body.vibeId, body.vote as Vote))
+      return context.json(await voteStore.recordVote(body.sessionId, body.vibeId, body.vote as Vote))
     } catch (error) {
       return context.json({ error: getErrorMessage(error) }, 409)
     }

@@ -1,7 +1,7 @@
 import { mkdtemp, rm, writeFile } from "node:fs/promises"
 import { tmpdir } from "node:os"
 import { join } from "node:path"
-import { afterEach, describe, expect, it } from "vitest"
+
 import { MarkdownRenderer } from "../../../src/campaign/renderers/markdown-renderer.js"
 
 const temporaryDirectories: string[] = []

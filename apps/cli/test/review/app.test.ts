@@ -1,5 +1,5 @@
 import { Buffer } from "node:buffer"
-import { describe, expect, it } from "vitest"
+
 import type { Campaign } from "../../src/campaign/campaign-loader.js"
 import { InMemoryVoteStore } from "../../src/review/in-memory-vote-store.js"
 import { createReviewApp } from "../../src/review/app.js"

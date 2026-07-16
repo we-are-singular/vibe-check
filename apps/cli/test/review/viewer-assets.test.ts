@@ -1,7 +1,7 @@
 import { mkdtemp, mkdir, rm, symlink, writeFile } from "node:fs/promises"
 import { tmpdir } from "node:os"
 import { join } from "node:path"
-import { afterEach, describe, expect, it } from "vitest"
+
 import { ViewerAssets } from "../../src/review/viewer-assets.js"
 
 const temporaryDirectories: string[] = []
@@ -50,6 +50,8 @@ describe("ViewerAssets", () => {
     await writeFile(outsideFile, "secret")
     await symlink(outsideFile, join(directory, "assets", "outside.js"))
 
+    // oxlint does not recognize it.skipIf callbacks as test bodies.
+    // oxlint-disable-next-line vitest/no-standalone-expect
     await expect(new ViewerAssets(directory).asset("assets/outside.js")).resolves.toBeNull()
     await rm(outsideFile, { force: true })
   })

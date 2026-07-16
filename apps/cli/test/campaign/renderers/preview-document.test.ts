@@ -1,4 +1,3 @@
-import { describe, expect, it } from "vitest"
 import { renderPreviewDocument } from "../../../src/campaign/renderers/preview-document.js"
 
 describe("renderPreviewDocument", () => {

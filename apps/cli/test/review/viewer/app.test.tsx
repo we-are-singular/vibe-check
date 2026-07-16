@@ -3,7 +3,7 @@
 
 import { cleanup, render, screen } from "@testing-library/react"
 import { userEvent } from "@testing-library/user-event"
-import { afterEach, describe, expect, it } from "vitest"
+
 import { ReviewApiClient, type Campaign, type ReviewSession } from "../../../src/review/viewer/api.js"
 import type { ResultRow, Vote } from "../../../src/types.js"
 import { ViewerApp } from "../../../src/review/viewer/app.js"

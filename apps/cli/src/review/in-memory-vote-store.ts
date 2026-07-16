@@ -2,16 +2,26 @@ import { randomBytes } from "node:crypto"
 import type { RenderedVibe, ResultRow, SessionSnapshot, Vote } from "../types.js"
 import { VOTE_VALUES } from "../types.js"
 
+export type RecordedVote = {
+  sessionId: string
+  vibe: Pick<RenderedVibe, "file" | "id" | "label">
+  vote: Vote
+}
+
+type VoteRecorder = (record: RecordedVote) => Promise<void>
 /**
  * Process-local vote state for the POC. It intentionally disappears on restart;
  * durable local Campaign state is a later vertical slice.
  */
 export class InMemoryVoteStore {
   private readonly sessions = new Map<string, Map<string, Vote>>()
-  private readonly vibeIds: ReadonlySet<string>
+  private readonly vibesById: ReadonlyMap<string, RenderedVibe>
 
-  constructor(private readonly vibes: readonly RenderedVibe[]) {
-    this.vibeIds = new Set(vibes.map(vibe => vibe.id))
+  constructor(
+    private readonly vibes: readonly RenderedVibe[],
+    private readonly recordAcceptedVote?: VoteRecorder
+  ) {
+    this.vibesById = new Map(vibes.map(vibe => [vibe.id, vibe]))
   }
 
   createOrResume(requestedSessionId?: string): SessionSnapshot {
@@ -27,13 +37,14 @@ export class InMemoryVoteStore {
     return { sessionId, votes: {} }
   }
 
-  recordVote(sessionId: string, vibeId: string, vote: Vote): SessionSnapshot {
+  async recordVote(sessionId: string, vibeId: string, vote: Vote): Promise<SessionSnapshot> {
     const votes = this.sessions.get(sessionId)
     if (!votes) {
       throw new Error("Unknown review session. Reload the review page to start again.")
     }
 
-    if (!this.vibeIds.has(vibeId)) {
+    const vibe = this.vibesById.get(vibeId)
+    if (!vibe) {
       throw new Error("Unknown vibe.")
     }
 
@@ -42,10 +53,24 @@ export class InMemoryVoteStore {
     }
 
     const existingVote = votes.get(vibeId)
-    if (existingVote && existingVote !== vote) {
-      throw new Error("A vote for this vibe was already recorded.")
+    if (existingVote) {
+      if (existingVote !== vote) {
+        throw new Error("A vote for this vibe was already recorded.")
+      }
+
+      return toSnapshot(sessionId, votes)
     }
 
+    // Write a durable event before making the accepted vote visible to the client.
+    await this.recordAcceptedVote?.({
+      sessionId,
+      vibe: {
+        file: vibe.file,
+        id: vibe.id,
+        label: vibe.label,
+      },
+      vote,
+    })
     votes.set(vibeId, vote)
     return toSnapshot(sessionId, votes)
   }

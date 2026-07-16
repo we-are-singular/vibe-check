@@ -1,8 +1,6 @@
 import { EventEmitter } from "node:events"
 import { PassThrough } from "node:stream"
 
-import { beforeEach, describe, expect, it, vi } from "vitest"
-
 const { spawnMock } = vi.hoisted(() => ({ spawnMock: vi.fn() }))
 
 vi.mock("node:child_process", () => ({ spawn: spawnMock }))
