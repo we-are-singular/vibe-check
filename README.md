@@ -10,6 +10,14 @@ Vibe Check runs through npm on Windows, macOS, and Linux. Requires Node.js 22 or
 npm install -g @we-are-singular/vibe-check
 ```
 
+### Install the agent skill
+
+Make Vibe Check available to compatible coding agents:
+
+```bash
+npx skills add we-are-singular/vibe-check
+```
+
 The package scope identifies its publisher. The installed command remains `vibe-check`.
 
 ## Quick start
