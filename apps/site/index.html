@@ -1,0 +1,754 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1" name="viewport" />
+    <title>vibe-check — agents generate, humans pick the vibe</title>
+    <meta
+      name="description"
+      content="Open-source CLI that lets agents collect human feedback on HTML and Markdown candidates. Serve a folder, share a link, get a ranked result back in your terminal."
+    />
+    <meta name="theme-color" content="#fff6ec" />
+    <link rel="icon" href="favicon.svg" type="image/svg+xml" />
+    <link rel="icon" href="favicon-32.png" sizes="32x32" type="image/png" />
+    <link rel="icon" href="favicon-512.png" sizes="512x512" type="image/png" />
+    <link rel="apple-touch-icon" href="apple-touch-icon.png" />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="vibe-check — agents generate, humans pick the vibe" />
+    <meta
+      property="og:description"
+      content="Open-source CLI that lets agents collect human feedback on HTML and Markdown candidates. Serve a folder, share a link, get a ranked result back in your terminal."
+    />
+    <meta property="og:image" content="og.png" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:image" content="og.png" />
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=JetBrains+Mono:wght@400;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="./style.css" />
+    <style>
+      :root {
+        --cream: #fff6ec;
+        --ink: #1a1523;
+        --ink-soft: #4a4257;
+        --ink-faint: #8b8496;
+        --coral: #ff5a7a;
+        --violet: #6c4df6;
+        --sunny: #ffc531;
+        --mint: #3eddb4;
+        --card-border: #ece4f5;
+        --terminal: #171221;
+        /* Motion tokens — strong custom curves; built-in CSS easings are too weak. */
+        --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+        --ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
+        --ease-spring: cubic-bezier(0.34, 1.3, 0.64, 1);
+      }
+      * {
+        box-sizing: border-box;
+        margin: 0;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="blob blob-a" aria-hidden="true"></div>
+    <div class="blob blob-b" aria-hidden="true"></div>
+    <div class="blob blob-c" aria-hidden="true"></div>
+
+    <nav>
+      <div class="nav-inner">
+        <a class="logo" href="#top"
+          ><img class="logo-mark" src="newlogoidea.png" alt="" width="69" height="38" />vibe-check</a
+        >
+        <div class="nav-links">
+          <a class="plain" href="#how">How it works</a>
+          <a class="plain" href="#voting">Voting systems</a>
+          <a class="plain" href="#install">Install</a>
+          <a class="plain" href="#docs">Docs</a>
+          <a class="gh-btn" href="https://github.com/we-are-singular/vibe-check">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path
+                d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"
+              />
+            </svg>
+            GitHub
+          </a>
+        </div>
+      </div>
+    </nav>
+
+    <div class="wrap" id="top">
+      <header class="hero">
+        <span class="badge"><span class="dot"></span>Open source · MIT</span>
+        <h1>
+          Agents generate.<br />Humans pick
+          <span class="marker">the vibe.</span>
+        </h1>
+        <p class="hero-sub">
+          vibe-check is a tiny CLI that turns a folder of candidates into a browser review session. <br />
+          People vote — the ranked result lands back in the terminal.
+        </p>
+        <div class="hero-ctas">
+          <a class="btn btn-primary" href="https://github.com/we-are-singular/vibe-check">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path
+                d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"
+              />
+            </svg>
+            Star on GitHub
+          </a>
+          <button class="btn btn-code" type="button" data-copy="npm install -g @we-are-singular/vibe-check">
+            npm install -g @we-are-singular/vibe-check
+            <span class="copy-hint">⧉ copy</span>
+          </button>
+        </div>
+
+        <!-- Decorative, self-running reenactment of a real session. Buttons work too. -->
+        <div class="scene" id="scene">
+          <div class="browser" id="demo-browser">
+            <div class="browser-bar">
+              <div class="lights" aria-hidden="true"><span></span><span></span><span></span></div>
+              <span class="url mono">http://127.0.0.1:4173</span>
+            </div>
+            <div class="stage">
+              <div class="stage-top">
+                <span class="stage-label">Pick the hero direction</span>
+                <span class="stage-progress" id="stage-progress">Vibe 1 of 3</span>
+              </div>
+              <div class="candidate" id="candidate">
+                <div class="candidate-preview" id="candidate-preview">
+                  <span class="file-chip mono" id="candidate-file"></span>
+                </div>
+                <p class="candidate-note" id="candidate-note"></p>
+              </div>
+              <div class="thanks" id="thanks">
+                <p class="big">That’s the vibe. <span class="heart">♥</span> Thanks!</p>
+                <p class="small">3 of 3 reviewed — the summary is printing in the terminal.</p>
+              </div>
+              <div class="verdicts" id="verdicts">
+                <button class="verdict v-pass" type="button" data-verdict="pass">Pass</button>
+                <button class="verdict v-keep" type="button" data-verdict="keep">Keep</button>
+                <button class="verdict v-love" type="button" data-verdict="love">♥ Love</button>
+              </div>
+            </div>
+          </div>
+          <div class="terminal" id="demo-terminal">
+            <div class="terminal-bar">● ● ●&nbsp;&nbsp;zsh — vibe-check</div>
+            <div class="terminal-body" id="terminal-body">
+              <span class="t-prompt">$ </span><span class="caret"></span>
+            </div>
+          </div>
+          <div class="cursor" id="cursor" aria-hidden="true">
+            <svg width="26" height="26" viewBox="0 0 24 24">
+              <path d="M4 2 L20 12 L12.5 13.5 L9 22 Z" fill="#ff5a7a" stroke="#fff" stroke-width="1.6" />
+            </svg>
+          </div>
+        </div>
+      </header>
+
+      <section id="what">
+        <span class="eyebrow coral" data-reveal>What it is</span>
+        <h2 data-reveal>Human feedback,<br />on demand.</h2>
+        <p class="section-sub" data-reveal>
+          Agents can generate plenty of options. <b>vibe-check</b> helps them validate the alternatives with human
+          feedback, saving time and effort for everyone. The result returns as a ranked summary.
+        </p>
+        <div class="cards" data-reveal-group>
+          <div class="card" data-reveal>
+            <div class="glyph v">▣</div>
+            <h3>Vibes in. Signal back.</h3>
+            <p>
+              Drop two or more self-contained <code>.html</code> or <code>.md</code> files in one directory. Each file
+              is a Vibe — one immutable creative candidate. No build step, no uploads, no accounts.
+            </p>
+          </div>
+          <div class="card" data-reveal>
+            <div class="glyph c">♥</div>
+            <h3>Humans review in the browser</h3>
+            <p>
+              One local URL, one candidate at a time. Voters give a Verdict — pass, keep, love — rate stars, or leave a
+              comment. Anything can be skipped or revisited before the session ends.
+            </p>
+          </div>
+          <div class="card" data-reveal>
+            <div class="glyph m">⌘</div>
+            <h3>The result returns to the CLI</h3>
+            <p>
+              Stop with <code>Ctrl+C</code> and the Campaign Result prints where you started: Loves then Keeps, average
+              star rating, or submitted comments — ready for an agent to act on.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <section id="how">
+        <span class="eyebrow violet" data-reveal>How it works</span>
+        <h2 data-reveal>From slop machine<br />to human feedback in three steps.</h2>
+        <div class="steps" data-reveal-group>
+          <div class="step" data-reveal>
+            <div class="step-num">1</div>
+            <div>
+              <h3>Serve the candidates</h3>
+              <p>
+                Run the CLI against a folder with at least two candidates. Open the local URL it prints, or use
+                <code>--tunnel</code> to share the review remotely.
+              </p>
+            </div>
+            <div class="mock">
+              <span class="t-prompt">$</span> vibe-check serve ./hero-candidates<br />
+              <span class="t-dim">Loaded 3 vibes. Review:</span>
+              <span class="t-url">http://127.0.0.1:4173</span>
+            </div>
+          </div>
+          <div class="step" data-reveal>
+            <div class="step-num">2</div>
+            <div>
+              <h3>People review one Vibe at a time</h3>
+              <p>
+                Each voter session reviews one Vibe at a time in the browser. Feedback is revisable until the session
+                ends — no sign-up, no ceremony.
+              </p>
+            </div>
+            <div class="mock light">
+              <div class="mock-verdicts">
+                <span class="mock-verdict">Pass</span>
+                <span class="mock-verdict">Keep</span>
+                <span class="mock-verdict love">♥ Love</span>
+              </div>
+            </div>
+          </div>
+          <div class="step" data-reveal>
+            <div class="step-num">3</div>
+            <div>
+              <h3>Read the ranked summary</h3>
+              <p>
+                Press <b>Ctrl+C</b> to end the session and print the result. Pipe it, save it, or review it—<code
+                  >--json</code
+                >
+                and <code>--output</code> keep the signal moving.
+              </p>
+            </div>
+            <div class="mock">
+              <span class="t-love">♥ 01-bold-hero.html</span> — loved<br />
+              <span class="t-keep">✓ 02-quiet-hero.md</span> — kept<br />
+              <span class="t-dim">✕ 03-weird-hero.html — passed</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="voting">
+        <span class="eyebrow mint" data-reveal>Voting systems</span>
+        <h2 data-reveal>Pick your feedback mechanic.</h2>
+        <p class="section-sub" data-reveal>
+          The creator chooses one voting system when opening a Campaign. <br />
+          Every system allows unanswered candidates, and voters can revise earlier feedback before the session ends.
+        </p>
+        <div class="cards" data-reveal-group>
+          <div class="card" data-reveal>
+            <div class="glyph c">♥</div>
+            <h3>tinder <code>default</code></h3>
+            <p>
+              Fast triage: <strong>Pass</strong>, <strong>Keep</strong>, or <strong>Love</strong>. A Love counts as a
+              Keep with extra emphasis. The summary sorts by Loves, then Keeps.
+            </p>
+          </div>
+          <div class="card" data-reveal>
+            <div class="glyph s">★</div>
+            <h3>stars</h3>
+            <p>
+              One-to-five stars per Vibe for relative ranking when options are close. The summary ranks by average
+              rating, then rating count.
+            </p>
+          </div>
+          <div class="card" data-reveal>
+            <div class="glyph v">❝</div>
+            <h3>comment</h3>
+            <p>
+              Optional written feedback per Vibe — continue without writing anything. The summary reports comment counts
+              and lists what people said. No ranking, just signal.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <section id="share">
+        <span class="eyebrow coral" data-reveal>Public sessions</span>
+        <h2 data-reveal>Or invite the whole internet.</h2>
+        <p class="section-sub" data-reveal>
+          Use <code>--tunnel</code> to share a temporary review link through cloudflared or ngrok. Reviewers only need
+          the link; stopping the process closes it.
+        </p>
+        <div class="tunnel" data-reveal-group>
+          <div class="tunnel-cmd" data-reveal>
+            <div class="line"><span class="t-prompt">$</span> vibe-check serve ./candidates \</div>
+            <div class="line">&nbsp;&nbsp;--voting stars \</div>
+            <div class="line">&nbsp;&nbsp;--tunnel cloudflare</div>
+            <div class="gap"></div>
+            <div class="line">
+              <span class="t-url">https://three-bouncy-otters.trycloudflare.com</span>
+            </div>
+            <div class="tunnel-provs">
+              works with:
+              <span class="prov">cloudflared</span>
+              <span class="prov">ngrok</span>
+            </div>
+          </div>
+          <div class="slack" data-reveal>
+            <div class="slack-rail" aria-hidden="true">
+              <div class="ws">✓</div>
+              <div class="h on">#</div>
+              <div class="h">#</div>
+              <div class="h">#</div>
+            </div>
+            <div class="slack-main">
+              <div class="slack-ch">
+                <span class="hash">#</span> website-vibes
+                <span class="members">· 3 members</span>
+              </div>
+              <div class="slack-msgs">
+                <div class="msg">
+                  <div class="av s">🦦</div>
+                  <div class="body">
+                    <div><span class="who">sam</span><span class="when">11:02 AM</span></div>
+                    <div class="text">
+                      hey team 🙏 help me pick a vibe real quick — like 30 seconds?
+                      <a href="#">https://three-bouncy-otters.trycloudflare.com</a>
+                    </div>
+                    <div class="reactions">
+                      <span class="reaction me">👀 4</span>
+                      <span class="reaction">✋ 2</span>
+                    </div>
+                  </div>
+                </div>
+                <div class="msg">
+                  <div class="av a">🎧</div>
+                  <div class="body">
+                    <div><span class="who">alex</span><span class="when">11:04 AM</span></div>
+                    <div class="text">voted! I loved the pink one!</div>
+                  </div>
+                </div>
+                <div class="typing">
+                  <span class="dots"><span></span><span></span><span></span></span>
+                  priya is typing…
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <p class="docs-more" data-reveal>
+          The provider executable must be installed first (<code>cloudflared</code>, or
+          <code>ngrok</code> after <code>ngrok config add-authtoken</code>). Vibe Check never asks participants to
+          identify themselves, but the provider, browser, or network may still process connection metadata.
+        </p>
+      </section>
+
+      <section id="install">
+        <span class="eyebrow sunny" data-reveal>Install</span>
+        <h2 data-reveal>One CLI for you. One skill for your agent.</h2>
+        <div class="install-grid" data-reveal-group>
+          <div class="install-card" data-reveal>
+            <h3>The CLI</h3>
+            <p>
+              The whole product is one npm package. The installed command is
+              <strong>vibe-check</strong> — the scope just names the publisher.
+            </p>
+            <div class="cmd">
+              <code><span class="p">$</span> npm install -g @we-are-singular/vibe-check</code>
+              <button class="copy-btn" type="button" data-copy="npm install -g @we-are-singular/vibe-check">
+                Copy
+              </button>
+            </div>
+            <div class="install-meta">
+              <span class="chip">Node.js 22+</span>
+              <span class="chip">npm 11+</span>
+              <span class="chip">Windows</span>
+              <span class="chip">macOS</span>
+              <span class="chip">Linux</span>
+            </div>
+          </div>
+          <div class="install-card skill" data-reveal>
+            <h3>The agent skill</h3>
+            <p>
+              Teach your coding agent when and how to run a vibe check. Install with the Skills CLI, or print the
+              built-in guide with
+              <strong>vibe-check skill</strong>.
+            </p>
+            <div class="cmd">
+              <code><span class="p">$</span> npx skills add we-are-singular/vibe-check</code>
+              <button class="copy-btn" type="button" data-copy="npx skills add we-are-singular/vibe-check">Copy</button>
+            </div>
+            <div class="install-meta">
+              <span class="chip">Works with compatible agents</span>
+              <span class="chip">or: vibe-check skill --install</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="docs">
+        <span class="eyebrow violet" data-reveal>Mini docs</span>
+        <h2 data-reveal>Everything else is one flag away.</h2>
+        <div class="docs-table" data-reveal>
+          <table>
+            <thead>
+              <tr>
+                <th>Flag</th>
+                <th>Alias</th>
+                <th>What it does</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code>--voting tinder|stars|comment</code></td>
+                <td><code>--vote</code></td>
+                <td>Choose the feedback mechanic. Default: <code>tinder</code>.</td>
+              </tr>
+              <tr>
+                <td><code>--name "Which hero wins?"</code></td>
+                <td><code>-n</code></td>
+                <td>Title the Campaign — a name or the review question itself.</td>
+              </tr>
+              <tr>
+                <td><code>--port 4214</code></td>
+                <td><code>-p</code></td>
+                <td>Use another loopback port when 4173 is taken.</td>
+              </tr>
+              <tr>
+                <td><code>--tunnel cloudflare|ngrok</code></td>
+                <td><code>-t</code></td>
+                <td>Share a temporary public link through an installed tunnel provider.</td>
+              </tr>
+              <tr>
+                <td><code>--json</code></td>
+                <td>—</td>
+                <td>Emit newline-delimited JSON lifecycle events for automation.</td>
+              </tr>
+              <tr>
+                <td><code>--output results.jsonl</code></td>
+                <td><code>-o</code></td>
+                <td>Mirror every event — feedback and the final summary — to a file.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <p class="docs-more" data-reveal>
+          Full usage, campaign-file rules, and event formats live in the
+          <a href="https://github.com/we-are-singular/vibe-check#readme">README</a>. The domain language (Vibes,
+          Campaigns, Verdicts) is defined in
+          <a href="https://github.com/we-are-singular/vibe-check/blob/main/CONTEXT.md">CONTEXT.md</a>.
+        </p>
+      </section>
+
+      <section id="oss">
+        <div class="oss-panel" data-reveal>
+          <h2>Open source, MIT, PRs welcome.</h2>
+          <p>
+            vibe-check is early and opinionated — help shape it. File issues, propose voting systems, or just tell us
+            what you vibe-checked.
+          </p>
+          <div class="oss-links">
+            <a class="solid" href="https://github.com/we-are-singular/vibe-check">★ we-are-singular/vibe-check</a>
+            <a href="https://github.com/we-are-singular/vibe-check/issues">Issues</a>
+            <a href="https://www.npmjs.com/package/@we-are-singular/vibe-check">npm</a>
+            <a href="llms.txt">llms.txt</a>
+          </div>
+        </div>
+      </section>
+
+      <footer>
+        <div class="foot-inner">
+          <span>
+            Made with <span class="heart">♥</span> at <a href="https://wearesingular.com">we are singular</a> · MIT
+            License</span
+          >
+          <span>
+            <a href="https://github.com/we-are-singular/vibe-check">GitHub</a> ·
+            <a href="https://www.npmjs.com/package/@we-are-singular/vibe-check">npm</a>
+            ·
+            <a href="llms.txt">llms.txt</a>
+          </span>
+          <p class="foot-note">This page’s theme was chosen by an actual vibe-check session — ★ Dogfooding works!</p>
+        </div>
+      </footer>
+    </div>
+
+    <script>
+      /* ---------- copy buttons ---------- */
+      document.querySelectorAll("[data-copy]").forEach(btn => {
+        btn.addEventListener("click", async () => {
+          const text = btn.getAttribute("data-copy")
+          try {
+            await navigator.clipboard.writeText(text)
+          } catch {
+            const ta = document.createElement("textarea")
+            ta.value = text
+            document.body.appendChild(ta)
+            ta.select()
+            document.execCommand("copy")
+            ta.remove()
+          }
+          const label = btn.classList.contains("copy-btn") ? btn : btn.querySelector(".copy-hint")
+          const original = label.textContent
+          label.textContent = btn.classList.contains("copy-btn") ? "Copied!" : "✓ copied"
+          btn.classList.add("copied")
+          setTimeout(() => {
+            label.textContent = original
+            btn.classList.remove("copied")
+          }, 1600)
+        })
+      })
+
+      /* ---------- hero demo ---------- */
+      const DEMO = (() => {
+        const scene = document.getElementById("scene")
+        const browser = document.getElementById("demo-browser")
+        const candidateEl = document.getElementById("candidate")
+        const previewEl = document.getElementById("candidate-preview")
+        const fileEl = document.getElementById("candidate-file")
+        const noteEl = document.getElementById("candidate-note")
+        const progressEl = document.getElementById("stage-progress")
+        const thanksEl = document.getElementById("thanks")
+        const verdictsEl = document.getElementById("verdicts")
+        const termBody = document.getElementById("terminal-body")
+        const cursor = document.getElementById("cursor")
+
+        const candidates = [
+          {
+            file: "01-bold-hero.html",
+            note: "“Big type, louder colors. Subtlety left the room.”",
+            gradient: "linear-gradient(120deg, #ff5a7a, #6c4df6 55%, #3eddb4)",
+          },
+          {
+            file: "02-quiet-hero.md",
+            note: "“Whispers in markdown. Confident, but indoors.”",
+            gradient: "linear-gradient(120deg, #fff6ec, #ffc531)",
+          },
+          {
+            file: "03-weird-hero.html",
+            note: "“Comic Sans, ironically. Probably.”",
+            gradient: "linear-gradient(120deg, #1a1523, #6c4df6)",
+          },
+        ]
+        // The autoplay script: which verdict the fake voter gives each candidate.
+        const script = ["love", "keep", "pass"]
+
+        const sleep = ms => new Promise(r => setTimeout(r, ms))
+        let idx = 0
+        let pausedUntil = 0 // user interaction buys quiet time for manual clicking
+
+        async function waitIfPaused() {
+          while (Date.now() < pausedUntil) await sleep(250)
+        }
+
+        function renderCandidate(i, entering) {
+          const c = candidates[i]
+          fileEl.textContent = c.file
+          noteEl.textContent = c.note
+          previewEl.style.background = c.gradient
+          progressEl.textContent = `Vibe ${i + 1} of ${candidates.length}`
+          candidateEl.style.display = ""
+          thanksEl.classList.remove("show")
+          if (entering) {
+            candidateEl.classList.add("entering")
+            requestAnimationFrame(() => requestAnimationFrame(() => candidateEl.classList.remove("entering")))
+          }
+        }
+
+        function showThanks() {
+          candidateEl.style.display = "none"
+          progressEl.textContent = "Done"
+          thanksEl.classList.add("show")
+        }
+
+        // One verdict, shared by the autoplayer and real clicks: press, swipe out, advance.
+        async function advance(verdict) {
+          const candidate = candidates[idx]
+          const btn = verdictsEl.querySelector(`[data-verdict="${verdict}"]`)
+          btn.classList.add("pressed")
+          await sleep(260)
+          btn.classList.remove("pressed")
+          const logs = {
+            pass: ["t-dim", "✕", "passed"],
+            keep: ["t-keep", "✓", "kept"],
+            love: ["t-love", "♥", "loved"],
+          }
+          const [tone, icon, label] = logs[verdict]
+          termLine(`<span class="${tone}">${icon} ${candidate.file}</span> — ${label}`)
+          candidateEl.classList.add("leaving")
+          await sleep(340)
+          candidateEl.classList.remove("leaving")
+          idx += 1
+          if (idx < candidates.length) renderCandidate(idx, true)
+          else showThanks()
+        }
+
+        function moveCursorTo(el, dx = 0, dy = 0) {
+          const s = scene.getBoundingClientRect()
+          const r = el.getBoundingClientRect()
+          const x = r.left - s.left + r.width / 2 + dx
+          const y = r.top - s.top + r.height / 2 + dy
+          cursor.style.transform = `translate(${x}px, ${y}px)`
+        }
+
+        async function clickWithCursor(el, verdict) {
+          moveCursorTo(el)
+          await sleep(650)
+          await waitIfPaused()
+          cursor.classList.add("clicking")
+          await sleep(150)
+          cursor.classList.remove("clicking")
+          await advance(verdict)
+          await sleep(500)
+        }
+
+        function termLine(html) {
+          const line = document.createElement("div")
+          line.innerHTML = html
+          termBody.appendChild(line)
+          return line
+        }
+
+        async function typeCommand(text) {
+          const line = termLine(
+            `<span class="t-prompt">$ </span><span class="t-typed"></span><span class="caret"></span>`
+          )
+          const target = line.querySelector(".t-typed")
+          for (const ch of text) {
+            target.textContent += ch
+            await sleep(34 + Math.random() * 46)
+          }
+          line.querySelector(".caret").remove()
+        }
+
+        function resetScene() {
+          idx = 0
+          scene.classList.remove("review")
+          termBody.innerHTML = '<span class="t-prompt">$ </span><span class="caret"></span>'
+          renderCandidate(0, false)
+        }
+
+        async function runLoop() {
+          for (;;) {
+            // Beat 1 — centered console: type the command, print the URL.
+            resetScene()
+            cursor.style.opacity = "0"
+            await sleep(550) // let the console settle into center stage
+            await waitIfPaused()
+            termBody.innerHTML = ""
+            await typeCommand("vibe-check serve ./hero-candidates")
+            await sleep(420)
+            termLine(
+              '<span class="t-dim">Loaded 3 vibes. Review:</span> <span class="t-url">http://127.0.0.1:4173</span>'
+            )
+            await sleep(750)
+            // Beat 2 — review: browser arrives, console retreats to the corner.
+            scene.classList.add("review")
+            renderCandidate(0, false)
+            await sleep(700) // let the move play out
+            await waitIfPaused()
+            cursor.style.opacity = "1"
+            for (let i = 0; i < candidates.length; i++) {
+              if (idx !== i) break // a human hijacked the session; let them drive
+              await waitIfPaused()
+              await clickWithCursor(verdictsEl.querySelector(`[data-verdict="${script[i]}"]`), script[i])
+            }
+            if (idx >= candidates.length) {
+              cursor.style.opacity = "0"
+              await sleep(1400)
+              // Loop point — browser closes and the completed event log returns to center stage.
+              scene.classList.remove("review")
+              await sleep(2600)
+            } else {
+              // Human drove the session; hold a beat before resetting.
+              await sleep(2500)
+            }
+          }
+        }
+
+        function renderStatic() {
+          // prefers-reduced-motion: one calm frame — browser mid-review, console in the corner.
+          idx = 0
+          renderCandidate(0, false)
+          scene.classList.add("review")
+          termBody.innerHTML = ""
+          termLine('<span class="t-prompt">$ </span>vibe-check serve ./hero-candidates')
+          termLine(
+            '<span class="t-dim">Loaded 3 vibes. Review:</span> <span class="t-url">http://127.0.0.1:4173</span>'
+          )
+          termLine('<span class="t-love">♥ 01-bold-hero.html</span> — loved')
+          termLine('<span class="t-keep">✓ 02-quiet-hero.md</span> — kept')
+          cursor.style.display = "none"
+        }
+
+        verdictsEl.addEventListener("click", e => {
+          const btn = e.target.closest("[data-verdict]")
+          if (!btn || idx >= candidates.length) return
+          pausedUntil = Date.now() + 7000
+          cursor.style.opacity = "0"
+          advance(btn.getAttribute("data-verdict"))
+        })
+
+        return {
+          start() {
+            renderCandidate(0, false)
+            if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) renderStatic()
+            else runLoop()
+          },
+        }
+      })()
+
+      DEMO.start()
+
+      /* ---------- scroll reveal ---------- */
+      // Armed only here (never in CSS) so no-JS and reduced-motion visitors see everything.
+      ;(() => {
+        if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return
+        if (!("IntersectionObserver" in window)) return
+        const items = document.querySelectorAll("[data-reveal]")
+        if (!items.length) return
+        items.forEach(el => el.classList.add("reveal-armed"))
+
+        // Remove the armed state once the entrance lands, so hover springs aren't
+        // overridden by the reveal rule's higher specificity.
+        const disarm = el =>
+          el.addEventListener(
+            "transitionend",
+            () => {
+              el.classList.remove("reveal-armed", "revealed")
+              el.style.transitionDelay = ""
+            },
+            { once: true }
+          )
+
+        const io = new IntersectionObserver(
+          entries => {
+            for (const entry of entries) {
+              if (!entry.isIntersecting) continue
+              const el = entry.target
+              const group = el.closest("[data-reveal-group]")
+              if (group) {
+                // Reveal the whole sibling set with a short stagger.
+                ;[...group.querySelectorAll("[data-reveal]")].forEach((child, i) => {
+                  child.style.transitionDelay = `${i * 70}ms`
+                  child.classList.add("revealed")
+                  disarm(child)
+                  io.unobserve(child)
+                })
+              } else {
+                el.classList.add("revealed")
+                disarm(el)
+                io.unobserve(el)
+              }
+            }
+          },
+          { rootMargin: "0px 0px -70px" }
+        )
+        items.forEach(el => io.observe(el))
+      })()
+    </script>
+  </body>
+</html>

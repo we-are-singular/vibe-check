@@ -165,6 +165,7 @@ This is rebuild-on-save, not HMR. The CLI always serves the current `dist/viewer
 ## Project structure
 
 - `apps/cli` — the published Clipanion CLI, Hono review server, React viewer, and tunnel providers.
+- `apps/site` — the static project website, deployed to GitHub Pages by `.github/workflows/pages.yml`.
 - `demo` — example candidate directories.
 - `CONTEXT.md` — canonical domain language.
 

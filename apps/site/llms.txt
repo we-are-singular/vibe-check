@@ -1,0 +1,46 @@
+# vibe-check
+
+> vibe-check is an open-source CLI for collecting human feedback on self-contained HTML and Markdown candidates. An agent or creator serves a folder, humans review one candidate at a time in the browser (pass / keep / love, star ratings, or comments), and the aggregate result prints back in the terminal. MIT licensed, runs on Windows, macOS, and Linux.
+
+## Install
+
+- CLI (requires Node.js 22+, npm 11+): `npm install -g @we-are-singular/vibe-check`
+- Agent skill: `npx skills add we-are-singular/vibe-check`
+- Print the built-in agent guide: `vibe-check skill`
+
+## Quick start
+
+1. Put two or more `.html`, `.md`, or `.markdown` files directly in one directory (not recursive; lexical filename order; self-contained HTML only).
+2. Run `vibe-check serve ./candidates`
+3. Open the printed review URL (default http://127.0.0.1:4173), optionally share it with `--tunnel cloudflare` or `--tunnel ngrok`
+4. Voters leave feedback per candidate (all optional, all revisable until the session ends)
+5. Stop with Ctrl+C to print the ranked campaign summary
+
+## Voting systems
+
+- `tinder` (default): Pass / Keep / Love. Love counts as a Keep plus a Love. Summary sorts by Loves, then Keeps.
+- `stars`: 1–5 stars per candidate. Summary ranks by average rating, then rating count.
+- `comment`: optional written feedback per candidate. Summary reports counts and lists comments; no ranking.
+
+## Key options
+
+- `--voting tinder|stars|comment` (alias `--vote`): pick the feedback mechanic
+- `--name "question"` (alias `-n`): title the campaign
+- `--port 4214` (alias `-p`): change the loopback port
+- `--tunnel cloudflare|ngrok` (alias `-t`): temporary public review link
+- `--json`: emit NDJSON lifecycle events for automation
+- `--output results.jsonl` (alias `-o`): mirror every event and the final summary to a file
+
+## Docs
+
+- [Website](https://we-are-singular.github.io/vibe-check/): overview, animated demo, mini docs
+- [README](https://github.com/we-are-singular/vibe-check#readme): full install, usage, campaign-file rules, event formats
+- [CONTEXT.md](https://github.com/we-are-singular/vibe-check/blob/main/CONTEXT.md): canonical domain language (Vibe, Artifact, Campaign, Creator, Voter, Voter Session, Voting System, Verdict, Star Rating, Comment, Feedback, Campaign Result)
+
+## Links
+
+- [Repository](https://github.com/we-are-singular/vibe-check)
+- [Issues](https://github.com/we-are-singular/vibe-check/issues)
+- [Releases](https://github.com/we-are-singular/vibe-check/releases)
+- [npm package](https://www.npmjs.com/package/@we-are-singular/vibe-check)
+- [License: MIT](https://github.com/we-are-singular/vibe-check/blob/main/LICENSE)

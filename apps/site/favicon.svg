@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256">
+  <defs>
+    <linearGradient id="bubble" x1="34" y1="17" x2="222" y2="216" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#342d58" />
+      <stop offset="1" stop-color="#211c3d" />
+    </linearGradient>
+    <linearGradient id="heart" x1="82" y1="67" x2="174" y2="164" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#ff7890" />
+      <stop offset="1" stop-color="#ff4e6f" />
+    </linearGradient>
+  </defs>
+  <path d="M34 47C34 30 48 17 66 17h124c18 0 32 13 32 30v107c0 17-14 30-31 30h-91l-34 32c-9 8-23 0-20-12l6-20c-11-6-18-17-18-30V47Z" fill="url(#bubble)" />
+  <path d="m128 164-45-42c-15-15-15-39 0-50 15-13 34-9 45 6 11-15 30-19 45-6 15 11 15 35 0 50l-45 42Z" fill="url(#heart)" />
+</svg>
