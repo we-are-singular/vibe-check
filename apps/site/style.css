@@ -283,13 +283,13 @@ h1 {
 
 /* ---------- demo scene ---------- */
 /* The demo has two beats: a large centered console for startup and results, then a review
-   beat where it moves left into the browser's empty lower edge. The fixed scene height
-   keeps the console clear of the Verdict controls while both pieces transition. */
+   beat where it moves below-left as a live log. The browser and console never overlap,
+   so the Verdict controls remain clear throughout the transition. */
 .scene {
   position: relative;
   max-width: 820px;
   margin: 70px auto 0;
-  min-height: 560px;
+  min-height: 650px;
 }
 .browser {
   position: absolute;
@@ -477,7 +477,7 @@ h1 {
   position: absolute;
   z-index: 3;
   left: 50%;
-  top: 50%;
+  top: 210px;
   width: min(580px, 92%);
   background: var(--terminal);
   border-radius: 18px;
@@ -490,12 +490,12 @@ h1 {
     left 650ms var(--ease-in-out),
     top 650ms var(--ease-in-out);
 }
-/* Keep the console below the controls; it overlaps only the browser's generous bottom padding. */
+/* During voting the console becomes a separate live log below the browser. */
 .scene.review .terminal {
-  left: 0;
-  top: calc(100% - 12px);
-  width: min(430px, 80%);
-  transform: translate(0, -100%) rotate(-1.2deg);
+  left: 16px;
+  top: 454px;
+  width: min(460px, calc(100% - 32px));
+  transform: rotate(-1.2deg);
 }
 .terminal-bar {
   display: flex;
@@ -517,6 +517,15 @@ h1 {
   text-align: left;
   white-space: pre-wrap;
   word-break: break-word;
+}
+.terminal-line {
+  animation: terminal-line-in 320ms var(--ease-out) both;
+}
+@keyframes terminal-line-in {
+  from {
+    opacity: 0;
+    transform: translateY(5px);
+  }
 }
 .t-prompt {
   color: var(--violet);
@@ -591,6 +600,7 @@ h1 {
     transform: rotate(-1.2deg);
   }
   .scene.review .terminal {
+    width: 100%;
     transform: rotate(-1.2deg);
   }
 }
@@ -1240,6 +1250,7 @@ footer {
 /* Left rail of mechanics (30%) + browser reenactment (70%). The rail stretches to
    match the browser height; the active tab owns the auto-advance progress bar. */
 .showcase {
+  position: relative; /* anchors the floating corner objects */
   display: grid;
   grid-template-columns: minmax(250px, 3fr) minmax(0, 7fr);
   gap: 26px;
@@ -1312,8 +1323,8 @@ footer {
 }
 .showcase-item.active {
   background: #fff;
-  border-color: var(--ink);
-  box-shadow: 0 20px 40px -28px rgba(26, 21, 35, 0.4);
+  border-color: #d9d2e4;
+  box-shadow: 0 28px 60px -22px rgba(26, 21, 35, 0.38);
 }
 .showcase-item:focus-visible {
   outline: 2.5px solid var(--violet);
@@ -1324,8 +1335,8 @@ footer {
   left: 0;
   right: 0;
   bottom: 0;
-  height: 3px;
-  background: rgba(26, 21, 35, 0.08);
+  height: 5px;
+  background: rgba(26, 21, 35, 0.06);
   opacity: 0;
   transition: opacity 200ms var(--ease-out);
 }
@@ -1336,7 +1347,7 @@ footer {
   display: block;
   height: 100%;
   width: 0;
-  background: linear-gradient(90deg, var(--coral), var(--violet));
+  background: linear-gradient(90deg, #ffd4df, #ff9fb9);
 }
 /* `.timed` is JS-only — without it (no-JS) the bar never pretends a countdown. */
 .showcase.timed .showcase-item.active .bar span {
@@ -1391,29 +1402,39 @@ footer {
 .panel-caption {
   position: absolute;
   left: 26px;
-  right: 26px;
+  right: 145px; /* keep the text clear of the half-in, half-out object */
   bottom: 15px;
   font-size: 13px;
   line-height: 1.5;
   color: var(--ink-faint);
 }
 
-/* Floating pseudo-3D object: an SVG silhouette stacked into an extruded "coin"
-   (preserve-3d layers), spun on a tilted spindle with a synced floor shadow.
-   Animations live under `.active` so each panel restarts fresh when selected. */
+/* The 3D objects live outside the browser mock, floating on top of its bottom-right
+   corner with a small outward bleed, without relying on the clipped interior. */
 .obj-zone {
   position: absolute;
-  top: 34px;
-  right: 30px;
-  width: 100px;
-  height: 126px;
+  right: 0;
+  bottom: 0;
+  width: 240px;
+  height: 240px;
+  transform: translate(40%, 30%);
   perspective: 640px;
   pointer-events: none;
   z-index: 2;
+  opacity: 0;
+  visibility: hidden;
+  transition:
+    opacity 400ms var(--ease-out),
+    visibility 0s linear 450ms;
+}
+.obj-zone.on {
+  opacity: 1;
+  visibility: visible;
+  transition-delay: 0s;
 }
 .obj-float {
   position: absolute;
-  inset: 0 0 24px;
+  inset: 0;
 }
 .obj-tilt {
   width: 100%;
@@ -1421,12 +1442,15 @@ footer {
   transform: rotateX(-14deg);
   transform-style: preserve-3d;
 }
+.obj-zone.webgl .obj-tilt {
+  display: none; /* the WebGL canvas replaces the SVG coin */
+}
 .obj3d {
   position: absolute;
   inset: 0;
   margin: auto;
-  width: 86px;
-  height: 86px;
+  width: 190px;
+  height: 190px;
   transform-style: preserve-3d;
 }
 .obj3d svg {
@@ -1441,22 +1465,22 @@ footer {
 }
 .obj-shadow {
   position: absolute;
-  bottom: 0;
+  bottom: 8px;
   left: 50%;
-  width: 72px;
-  height: 14px;
+  width: 120px;
+  height: 16px;
   border-radius: 50%;
   background: rgba(26, 21, 35, 0.22);
-  filter: blur(4px);
+  filter: blur(5px);
   transform: translateX(-50%);
 }
-.showcase-panel.active .obj3d {
+.obj-zone.on .obj3d {
   animation: obj-spin 7s linear infinite;
 }
-.showcase-panel.active .obj-float {
+.obj-zone.on .obj-float {
   animation: obj-bob 2.7s ease-in-out infinite alternate;
 }
-.showcase-panel.active .obj-shadow {
+.obj-zone.on .obj-shadow {
   animation: obj-shadow 2.7s ease-in-out infinite alternate;
 }
 @keyframes obj-spin {
@@ -1466,10 +1490,10 @@ footer {
 }
 @keyframes obj-bob {
   from {
-    transform: translateY(-7px);
+    transform: translateY(-5px);
   }
   to {
-    transform: translateY(9px);
+    transform: translateY(6px);
   }
 }
 @keyframes obj-shadow {
@@ -2142,14 +2166,23 @@ footer {
 }
 @media (max-width: 640px) {
   .obj-zone {
-    width: 72px;
-    height: 96px;
-    top: 40px;
-    right: 18px;
+    right: 0;
+    bottom: 0;
+    width: 150px;
+    height: 150px;
+    transform: translate(40%, 30%);
   }
   .obj3d {
-    width: 60px;
-    height: 60px;
+    width: 110px;
+    height: 110px;
+  }
+  .obj-shadow {
+    width: 90px;
+    height: 12px;
+    bottom: 8px;
+  }
+  .panel-caption {
+    right: 110px;
   }
   .c-skip {
     display: none;
