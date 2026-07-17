@@ -2,6 +2,9 @@
 
 Share feedback on static HTML and Markdown alternatives with an agent, a teammate, or a wider group.
 
+<img width="1200" height="630" alt="image" src="https://github.com/user-attachments/assets/5f2c03a9-6d5b-45bc-8876-c7b01bba93b1" />
+
+
 ## Install
 
 Vibe Check runs through npm on Windows, macOS, and Linux. Requires Node.js 22 or newer and npm 11 or newer.
