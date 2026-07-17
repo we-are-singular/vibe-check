@@ -1,0 +1,117 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1" name="viewport" />
+    <title>Neo-Brutalist Zine</title>
+    <style>
+      :root {
+        --paper: #fffdf5;
+        --ink: #111111;
+        --volt: #e6ff00;
+        --pink: #ff5da2;
+        --blue: #4d6bfe;
+        --orange: #ff4d00;
+      }
+      * { box-sizing: border-box; margin: 0; }
+      body {
+        min-height: 100vh;
+        background: var(--paper);
+        background-image: radial-gradient(rgba(17,17,17,.14) 1.2px, transparent 1.2px);
+        background-size: 18px 18px;
+        color: var(--ink);
+        font-family: "Arial Black", "Arial Narrow Bold", Impact, system-ui, sans-serif;
+        overflow-x: hidden;
+      }
+      .ticker {
+        background: var(--ink); color: var(--volt);
+        font-size: 14px; letter-spacing: .2em; text-transform: uppercase;
+        padding: 10px 0; white-space: nowrap; overflow: hidden;
+        border-bottom: 3px solid var(--ink);
+      }
+      .ticker span { display: inline-block; padding-right: 48px; }
+      main { max-width: 900px; margin: 0 auto; padding: 48px 20px 80px; }
+      .masthead { position: relative; text-align: center; }
+      .sticker {
+        position: absolute; top: -18px; right: 6%;
+        background: var(--pink); color: var(--ink);
+        border: 3px solid var(--ink); border-radius: 50%;
+        width: 110px; height: 110px; display: flex; align-items: center; justify-content: center;
+        font-size: 15px; line-height: 1.1; text-transform: uppercase;
+        transform: rotate(12deg); box-shadow: 5px 5px 0 var(--ink);
+      }
+      h1 {
+        font-size: clamp(56px, 11vw, 120px); line-height: .88; letter-spacing: -.02em;
+        text-transform: uppercase;
+      }
+      h1 .outline {
+        color: transparent;
+        -webkit-text-stroke: 3px var(--ink);
+        text-stroke: 3px var(--ink);
+      }
+      .sub {
+        display: inline-block; margin-top: 26px;
+        background: var(--volt); border: 3px solid var(--ink); box-shadow: 7px 7px 0 var(--ink);
+        font-family: "Courier New", monospace; font-weight: 700; font-size: clamp(14px, 2vw, 17px);
+        padding: 14px 18px; max-width: 620px; line-height: 1.5; text-align: left;
+        transform: rotate(-.6deg);
+      }
+      .ctas { display: flex; flex-wrap: wrap; gap: 18px; margin-top: 40px; justify-content: center; }
+      .cta {
+        border: 3px solid var(--ink); box-shadow: 8px 8px 0 var(--ink);
+        padding: 18px 26px; font-size: 17px; text-transform: uppercase; text-decoration: none;
+        color: var(--ink); letter-spacing: .03em;
+      }
+      .cta:hover { transform: translate(3px, 3px); box-shadow: 5px 5px 0 var(--ink); }
+      .cta-a { background: var(--blue); color: #fff; }
+      .cta-b { background: var(--paper); font-family: "Courier New", monospace; text-transform: none; font-weight: 700; }
+      .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-top: 56px; }
+      .cell { border: 3px solid var(--ink); padding: 18px; box-shadow: 6px 6px 0 var(--ink); background: #fff; }
+      .cell h2 { font-size: 15px; text-transform: uppercase; letter-spacing: .05em; }
+      .cell p { font-family: "Courier New", monospace; font-weight: 700; font-size: 13px; margin-top: 8px; line-height: 1.45; }
+      .cell.c1 { background: var(--pink); transform: rotate(-1deg); }
+      .cell.c2 { background: var(--volt); transform: rotate(.8deg); }
+      .cell.c3 { background: var(--orange); color: #fff; transform: rotate(-.5deg); }
+      .cell .stars { font-size: 22px; letter-spacing: 4px; margin-top: 6px; }
+      .foot {
+        margin-top: 52px; text-align: center;
+        font-family: "Courier New", monospace; font-weight: 700; font-size: 13px; letter-spacing: .1em;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="ticker" aria-hidden="true">
+      <span>PASS ✕ KEEP ✓ LOVE ♥ PASS ✕ KEEP ✓ LOVE ♥ PASS ✕ KEEP ✓ LOVE ♥ PASS ✕ KEEP ✓ LOVE ♥ PASS ✕ KEEP ✓ LOVE ♥</span>
+    </div>
+    <main>
+      <div class="masthead">
+        <div class="sticker">100% human judgment</div>
+        <h1>Vibe<br /><span class="outline">Check</span></h1>
+        <p class="sub">
+          Agents crank out HTML &amp; Markdown candidates. Humans smash the Pass / Keep / Love
+          buttons. Your terminal prints the winner. That’s the whole zine.
+        </p>
+        <div class="ctas">
+          <a class="cta cta-a" href="#">★ Star on GitHub</a>
+          <a class="cta cta-b" href="#">npm i -g @we-are-singular/vibe-check</a>
+        </div>
+      </div>
+      <div class="grid">
+        <div class="cell c1">
+          <h2>1 · Serve</h2>
+          <p>$ vibe-check serve ./candidates — one folder, two or more files, done.</p>
+        </div>
+        <div class="cell c2">
+          <h2>2 · Review</h2>
+          <p>One candidate at a time in the browser. Tinder, stars, or comments.</p>
+          <div class="stars">★★★★★</div>
+        </div>
+        <div class="cell c3">
+          <h2>3 · Rank</h2>
+          <p>Ctrl+C prints the aggregate summary. No accounts, no database.</p>
+        </div>
+      </div>
+      <p class="foot">OPEN SOURCE ✕ MIT ✕ WIN / MAC / LINUX</p>
+    </main>
+  </body>
+</html>

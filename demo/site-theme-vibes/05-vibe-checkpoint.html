@@ -1,0 +1,137 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1" name="viewport" />
+    <title>Vibe Checkpoint</title>
+    <style>
+      :root {
+        --safety: #ffd100;
+        --ink: #141414;
+        --concrete: #c9cdd3;
+        --wayfinding: #1b4f9c;
+        --stamp: #c02b0a;
+      }
+      * { box-sizing: border-box; margin: 0; }
+      body {
+        min-height: 100vh;
+        background: var(--concrete);
+        color: var(--ink);
+        font-family: Arial, Helvetica, sans-serif;
+        overflow-x: hidden;
+      }
+      .hazard {
+        height: 22px;
+        background: repeating-linear-gradient(-45deg, var(--safety) 0 28px, var(--ink) 28px 56px);
+      }
+      main { max-width: 860px; margin: 0 auto; padding: 44px 20px 72px; }
+      .sign {
+        background: var(--wayfinding); color: #fff;
+        padding: 26px 30px;
+        display: flex; align-items: center; justify-content: space-between; gap: 20px;
+        border: 6px solid #fff; outline: 3px solid var(--ink);
+        box-shadow: 0 10px 0 rgba(20,20,20,.25);
+      }
+      .sign h1 { font-size: clamp(30px, 5.5vw, 52px); font-weight: 900; letter-spacing: .01em; text-transform: uppercase; line-height: 1; }
+      .sign h1 small { display: block; font-size: .38em; letter-spacing: .34em; font-weight: 700; margin-bottom: 8px; opacity: .85; }
+      .sign .arrow { font-size: clamp(40px, 7vw, 72px); font-weight: 900; }
+      .notice {
+        margin-top: 26px; background: #fff; border: 3px solid var(--ink);
+        padding: 18px 22px; display: flex; gap: 16px; align-items: flex-start;
+        font-size: 15px; line-height: 1.55;
+      }
+      .notice .icon {
+        flex: none; width: 42px; height: 42px; border: 3px solid var(--ink); border-radius: 50%;
+        display: flex; align-items: center; justify-content: center;
+        font-size: 20px; font-weight: 900; background: var(--safety);
+      }
+      .notice strong { text-transform: uppercase; letter-spacing: .06em; }
+      .lane { display: grid; grid-template-columns: 1.35fr .9fr; gap: 26px; margin-top: 26px; }
+      @media (max-width: 720px) { .lane { grid-template-columns: 1fr; } }
+      .pass {
+        position: relative; background: #fff; border: 3px solid var(--ink); padding: 22px 24px;
+      }
+      .pass::before {
+        content: ""; position: absolute; top: 0; bottom: 0; left: 132px;
+        border-left: 3px dashed var(--ink);
+      }
+      .pass .stub {
+        position: absolute; top: 0; left: 0; bottom: 0; width: 132px;
+        display: flex; align-items: center; justify-content: center;
+      }
+      .pass .stub span { transform: rotate(-90deg); font-weight: 900; letter-spacing: .3em; font-size: 13px; white-space: nowrap; }
+      .pass .body { margin-left: 148px; }
+      .pass .body h2 { font-size: 13px; letter-spacing: .24em; text-transform: uppercase; color: #5a6068; }
+      .pass .body p { margin-top: 8px; font-family: "Courier New", monospace; font-weight: 700; font-size: 15px; }
+      .pass .stars { margin-top: 10px; font-size: 24px; letter-spacing: 6px; }
+      .barcode {
+        margin-top: 14px; height: 44px;
+        background: repeating-linear-gradient(90deg, var(--ink) 0 3px, transparent 3px 6px, var(--ink) 6px 7px, transparent 7px 12px, var(--ink) 12px 15px, transparent 15px 18px);
+      }
+      .stamp {
+        position: absolute; right: 14px; top: 14px;
+        border: 4px solid var(--stamp); color: var(--stamp); border-radius: 8px;
+        font-weight: 900; text-transform: uppercase; letter-spacing: .12em; font-size: 15px;
+        padding: 8px 12px; transform: rotate(9deg); opacity: .9;
+      }
+      .bin {
+        background: var(--ink); color: var(--safety); border: 3px solid var(--ink);
+        padding: 22px 24px; font-size: 14px; line-height: 1.6;
+      }
+      .bin h2 { font-size: 15px; letter-spacing: .2em; text-transform: uppercase; color: #fff; }
+      .bin .bin-icon { font-size: 40px; margin-top: 12px; }
+      .ctas { display: flex; flex-wrap: wrap; gap: 16px; margin-top: 34px; }
+      .cta {
+        padding: 17px 26px; font-size: 16px; font-weight: 900; text-transform: uppercase;
+        text-decoration: none; letter-spacing: .05em; border: 3px solid var(--ink);
+      }
+      .cta-a { background: var(--safety); color: var(--ink); box-shadow: 6px 6px 0 var(--ink); }
+      .cta-a:hover { transform: translate(2px, 2px); box-shadow: 4px 4px 0 var(--ink); }
+      .cta-b { background: #fff; color: var(--ink); font-family: "Courier New", monospace; text-transform: none; font-weight: 700; display: inline-flex; align-items: center; }
+      .foot {
+        margin-top: 40px; text-align: center;
+        font-size: 12px; font-weight: 700; letter-spacing: .26em; text-transform: uppercase; color: #5a6068;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="hazard" aria-hidden="true"></div>
+    <main>
+      <div class="sign">
+        <h1><small>Department of Human Judgment</small>Vibe Checkpoint</h1>
+        <span class="arrow" aria-hidden="true">➔</span>
+      </div>
+      <div class="notice">
+        <span class="icon" aria-hidden="true">!</span>
+        <p>
+          <strong>Attention travelers:</strong> all vibes must be screened. Agents shall place
+          HTML and Markdown candidates in the tray provided. Humans shall pass, keep, or love
+          each item. Results will be announced at the terminal. Gate closes on Ctrl+C.
+        </p>
+      </div>
+      <div class="lane">
+        <div class="pass">
+          <div class="stamp">Vibes<br />Verified</div>
+          <div class="stub"><span>BOARDING PASS · GATE 4173</span></div>
+          <div class="body">
+            <h2>Candidate 03 / Pricing B</h2>
+            <p>SEAT: KEEPER &nbsp; CLASS: LOVED</p>
+            <div class="stars" aria-label="Five stars">★★★★★</div>
+            <div class="barcode" aria-hidden="true"></div>
+          </div>
+        </div>
+        <div class="bin">
+          <h2>Bad Vibe Disposal</h2>
+          <p>Please place all bad vibes in the bin before proceeding. Unclaimed vibes will be discarded at session end.</p>
+          <div class="bin-icon" aria-hidden="true">🗑</div>
+        </div>
+      </div>
+      <div class="ctas">
+        <a class="cta cta-a" href="#">Proceed to GitHub ➔</a>
+        <a class="cta cta-b" href="#">npm i -g @we-are-singular/vibe-check</a>
+      </div>
+      <p class="foot">Open source · MIT · no liquids over 100ml · win / mac / linux</p>
+    </main>
+    <div class="hazard" aria-hidden="true"></div>
+  </body>
+</html>

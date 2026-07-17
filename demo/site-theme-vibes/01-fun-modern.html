@@ -1,0 +1,129 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1" name="viewport" />
+    <title>Fun Modern</title>
+    <style>
+      :root {
+        --cream: #fff6ec;
+        --ink: #1a1523;
+        --coral: #ff5a7a;
+        --violet: #6c4df6;
+        --sunny: #ffc531;
+        --mint: #3eddb4;
+      }
+      * { box-sizing: border-box; margin: 0; }
+      body {
+        min-height: 100vh;
+        background: var(--cream);
+        color: var(--ink);
+        font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+        overflow-x: hidden;
+      }
+      .blob { position: fixed; border-radius: 50%; filter: blur(90px); opacity: .5; z-index: 0; }
+      .blob-a { width: 46vw; height: 46vw; background: var(--coral); top: -14vw; right: -10vw; }
+      .blob-b { width: 40vw; height: 40vw; background: var(--violet); bottom: -16vw; left: -8vw; opacity: .35; }
+      .blob-c { width: 22vw; height: 22vw; background: var(--sunny); top: 30%; left: 12%; opacity: .45; }
+      main {
+        position: relative; z-index: 1;
+        max-width: 880px; margin: 0 auto; padding: 64px 24px 80px;
+        display: flex; flex-direction: column; align-items: center; text-align: center;
+      }
+      .badge {
+        display: inline-flex; align-items: center; gap: 8px;
+        background: var(--ink); color: var(--cream);
+        font-size: 13px; font-weight: 800; letter-spacing: .14em;
+        padding: 10px 20px; border-radius: 999px;
+        transform: rotate(-2deg);
+      }
+      .badge .dot { width: 9px; height: 9px; border-radius: 50%; background: var(--mint); }
+      h1 {
+        margin-top: 28px;
+        font-size: clamp(44px, 7.5vw, 84px);
+        font-weight: 900; letter-spacing: -.04em; line-height: .98;
+      }
+      h1 .marker {
+        position: relative; white-space: nowrap;
+      }
+      h1 .marker::after {
+        content: ""; position: absolute; left: -2%; right: -2%; bottom: .08em; height: .34em;
+        background: var(--sunny); border-radius: 6px; z-index: -1; transform: rotate(-1deg);
+      }
+      .sub {
+        margin-top: 22px; max-width: 560px;
+        font-size: clamp(16px, 2vw, 19px); line-height: 1.55; font-weight: 500;
+        color: #4a4257;
+      }
+      .ctas { display: flex; flex-wrap: wrap; gap: 14px; margin-top: 34px; justify-content: center; }
+      .cta {
+        display: inline-flex; align-items: center; gap: 10px;
+        padding: 16px 28px; border-radius: 999px;
+        font-size: 16px; font-weight: 800; text-decoration: none;
+        transition: transform .15s ease;
+      }
+      .cta:hover { transform: translateY(-3px) rotate(-1deg); }
+      .cta-primary { background: var(--violet); color: #fff; box-shadow: 0 12px 30px -8px rgba(108, 77, 246, .55); }
+      .cta-secondary {
+        background: #fff; color: var(--ink); border: 2px solid var(--ink);
+        font-family: ui-monospace, "SF Mono", Menlo, monospace; font-size: 14px;
+      }
+      .card {
+        margin-top: 56px; width: min(560px, 100%);
+        background: #fff; border-radius: 28px; padding: 26px;
+        box-shadow: 0 30px 60px -30px rgba(26, 21, 35, .35);
+        transform: rotate(1deg);
+        text-align: left;
+      }
+      .card-top { display: flex; align-items: center; justify-content: space-between; }
+      .card-label { font-size: 12px; font-weight: 800; letter-spacing: .12em; color: #8b8496; }
+      .card-stars { color: var(--sunny); font-size: 20px; letter-spacing: 2px; text-shadow: 0 2px 0 rgba(26,21,35,.12); }
+      .card-preview {
+        margin-top: 14px; height: 120px; border-radius: 18px;
+        background: linear-gradient(120deg, var(--coral), var(--violet) 55%, var(--mint));
+        display: flex; align-items: flex-end; padding: 14px;
+      }
+      .card-preview span {
+        background: rgba(255,255,255,.92); border-radius: 999px; padding: 6px 14px;
+        font-size: 12px; font-weight: 800;
+      }
+      .verdicts { display: flex; gap: 10px; margin-top: 16px; }
+      .verdict {
+        flex: 1; padding: 12px 0; border-radius: 14px; border: 2px solid #ece7f5;
+        font-size: 14px; font-weight: 800; text-align: center; color: #8b8496;
+      }
+      .verdict.love { background: var(--coral); border-color: var(--coral); color: #fff; transform: scale(1.04); }
+      .foot { margin-top: 40px; font-size: 13px; font-weight: 700; color: #8b8496; }
+    </style>
+  </head>
+  <body>
+    <div class="blob blob-a"></div>
+    <div class="blob blob-b"></div>
+    <div class="blob blob-c"></div>
+    <main>
+      <span class="badge"><span class="dot"></span>VIBE CHECK</span>
+      <h1>Agents generate.<br />Humans pick <span class="marker">the vibe.</span></h1>
+      <p class="sub">
+        Drop self-contained HTML or Markdown candidates in a folder, get a link, and let real
+        people pass, keep, and love their way to a ranked result — right back in your terminal.
+      </p>
+      <div class="ctas">
+        <a class="cta cta-primary" href="#">★ Star on GitHub</a>
+        <a class="cta cta-secondary" href="#">npm i -g @we-are-singular/vibe-check</a>
+      </div>
+      <div class="card">
+        <div class="card-top">
+          <span class="card-label">CANDIDATE 02 — HERO, OPTION B</span>
+          <span class="card-stars">★★★★★</span>
+        </div>
+        <div class="card-preview"><span>03-pricing.md</span></div>
+        <div class="verdicts">
+          <span class="verdict">Pass</span>
+          <span class="verdict">Keep</span>
+          <span class="verdict love">♥ Love</span>
+        </div>
+      </div>
+      <p class="foot">open source · MIT · windows / mac / linux</p>
+    </main>
+  </body>
+</html>
