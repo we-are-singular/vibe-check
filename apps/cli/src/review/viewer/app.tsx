@@ -73,7 +73,10 @@ export function ViewerApp({ api = defaultApi }: ViewerAppProps): React.JSX.Eleme
         setCommentDrafts(getCommentDrafts(session))
 
         if (session.isComplete) {
-          if (!ignored) setViewerState({ campaign, kind: "complete", session })
+          if (!ignored) {
+            setCurrentIndex(campaign.vibes.length - 1)
+            setViewerState({ campaign, kind: "complete", session })
+          }
           return
         }
 
@@ -199,8 +202,10 @@ export function ViewerApp({ api = defaultApi }: ViewerAppProps): React.JSX.Eleme
   const isComplete = viewerState.kind === "complete"
   const title =
     viewerState.kind === "reviewing" || viewerState.kind === "complete" ? viewerState.campaign.title : "Vibe Check"
-  const activeVibe = isReviewing ? viewerState.campaign.vibes[currentIndex] : undefined
+  const headerVibe = isReviewing || isComplete ? viewerState.campaign.vibes[currentIndex] : undefined
+  const activeVibe = isReviewing ? headerVibe : undefined
   const activeFeedback = activeVibe && isReviewing ? viewerState.session.feedback[activeVibe.id] : undefined
+  const isLastVibe = isReviewing && activeVibe ? currentIndex === viewerState.campaign.vibes.length - 1 : false
   const progress = getProgress(viewerState, currentIndex)
   const votingSystem =
     viewerState.kind === "reviewing" || viewerState.kind === "complete" ? viewerState.campaign.votingSystem : undefined
@@ -214,25 +219,37 @@ export function ViewerApp({ api = defaultApi }: ViewerAppProps): React.JSX.Eleme
       >
         {announcement}
       </p>
-      <header className="flex min-w-0 flex-wrap items-center justify-between gap-3 border-b border-border bg-surface px-4 py-3">
-        <h1 className="min-w-0 truncate text-base font-bold leading-tight text-ink sm:text-xl">{title}</h1>
-        <div className="flex w-full items-center justify-between gap-3 sm:w-auto sm:justify-end">
-          {isReviewing && activeVibe && (
+      <header className="review-header">
+        <div className="review-brand">
+          <VibeMark />
+          <div className="min-w-0">
+            <p className="review-brand-label">vibe-check</p>
+            <h1 className="truncate text-base font-bold leading-tight text-ink sm:text-xl">{title}</h1>
+          </div>
+        </div>
+        <div className="review-actions">
+          {(isComplete || (isReviewing && activeVibe)) && (
             <div className="header-queue">
-              <p className="shrink-0 text-sm text-muted">{progress}</p>
+              {isComplete ? (
+                <button className="review-responses-button" onClick={editResponses} type="button">
+                  Review my responses
+                </button>
+              ) : (
+                <p className="shrink-0 text-sm text-muted">{progress}</p>
+              )}
               <button
                 aria-label="Previous Vibe"
                 className="queue-button"
-                disabled={isSaving || currentIndex === 0}
+                disabled={isComplete || isSaving || currentIndex === 0}
                 onClick={goPrevious}
                 type="button"
               >
                 <ChevronLeft aria-hidden="true" />
               </button>
               <button
-                aria-label={currentIndex === viewerState.campaign.vibes.length - 1 ? "Finish review" : "Next Vibe"}
+                aria-label={isLastVibe ? "Finish review" : "Next Vibe"}
                 className="queue-button"
-                disabled={isSaving}
+                disabled={isComplete || isSaving}
                 onClick={() => void goNext()}
                 type="button"
               >
@@ -240,13 +257,8 @@ export function ViewerApp({ api = defaultApi }: ViewerAppProps): React.JSX.Eleme
               </button>
             </div>
           )}
-          {isComplete && (
-            <button className="review-responses-button" onClick={editResponses} type="button">
-              Review my responses
-            </button>
-          )}
-          {isReviewing && activeVibe?.kind === "html" && (
-            <PreviewModePicker onChange={changePreviewMode} value={previewMode} />
+          {headerVibe?.kind === "html" && (
+            <PreviewModePicker disabled={isComplete} onChange={changePreviewMode} value={previewMode} />
           )}
           <a
             aria-label="Open Vibe Check on GitHub"
@@ -326,16 +338,16 @@ export function ViewerApp({ api = defaultApi }: ViewerAppProps): React.JSX.Eleme
 
 function LoadingState(): React.JSX.Element {
   return (
-    <div className="flex h-full items-center justify-center bg-canvas p-4" role="status">
-      <p className="text-sm text-muted">Loading campaign…</p>
+    <div className="state-screen flex h-full items-center justify-center p-4" role="status">
+      <p className="state-card text-sm font-bold text-muted">Loading campaign…</p>
     </div>
   )
 }
 
 function ErrorState({ error, onRetry }: { error: string; onRetry: () => void }): React.JSX.Element {
   return (
-    <div className="h-full overflow-auto bg-canvas p-4 sm:p-6">
-      <div className="max-w-2xl">
+    <div className="state-screen h-full overflow-auto p-4 sm:p-6">
+      <div className="state-card max-w-2xl">
         <h2 className="text-2xl font-bold text-ink">Unable to load Vibe Check</h2>
         <p className="mt-2 leading-relaxed text-error">{error}</p>
         <button className="retry-button mt-4" onClick={onRetry} type="button">
@@ -355,9 +367,11 @@ function ReviewState({
   previewMode: PreviewMode
   vibe: Campaign["vibes"][number]
 }): React.JSX.Element {
+  const effectivePreviewMode = vibe.kind === "markdown" ? "full" : previewMode
+
   return (
-    <div className="h-full bg-preview-chrome">
-      <VibePreview mode={vibe.kind === "markdown" ? "full" : previewMode} vibe={vibe} />
+    <div className="review-stage h-full" data-preview-width={effectivePreviewMode}>
+      <VibePreview mode={effectivePreviewMode} vibe={vibe} />
       <span className="sr-only">{isSaving ? "Saving your feedback" : `Reviewing ${vibe.label}`}</span>
     </div>
   )
@@ -365,9 +379,9 @@ function ReviewState({
 
 function ThankYouState(): React.JSX.Element {
   return (
-    <div className="grid h-full place-items-center overflow-auto bg-canvas p-4 sm:p-6">
-      <div className="w-full max-w-2xl text-center">
-        <div className="mx-auto flex size-14 items-center justify-center rounded-full bg-love-surface text-on-love">
+    <div className="state-screen grid h-full place-items-center overflow-auto p-4 sm:p-6">
+      <div className="thank-you-content w-full max-w-2xl text-center">
+        <div className="thank-you-heart mx-auto flex size-14 items-center justify-center rounded-full bg-love-surface text-on-love">
           <Heart aria-hidden className="size-7" fill="currentColor" />
         </div>
         <p className="mt-6 text-sm font-bold tracking-wide text-muted uppercase">Vibes Checked!</p>
@@ -379,27 +393,53 @@ function ThankYouState(): React.JSX.Element {
           You have done your part, now go make something lovely!
         </p>
 
-        <section className="mt-8 rounded-2xl border border-border bg-surface p-6 text-left shadow-sm sm:p-8">
+        <section className="thank-you-card mt-8 rounded-2xl border border-border bg-surface p-6 text-left shadow-sm sm:p-8">
           <p className="text-sm font-bold tracking-wide text-muted uppercase">Keep the good vibes moving</p>
           <h3 className="mt-2 text-xl font-bold text-ink">Create your own Vibe Check</h3>
           <p className="mt-2 leading-relaxed text-muted">
             Install the skill, point it at a folder of ideas, and invite your people to react together.
           </p>
-          <code className="mt-5 block overflow-x-auto rounded-control bg-canvas px-4 py-3 text-sm font-semibold text-ink">
+          <code className="thank-you-command mt-5 block overflow-x-auto rounded-control px-4 py-3 text-sm font-semibold">
             npx skills add we-are-singular/vibe-check
           </code>
-          <a
-            className="mt-5 inline-flex items-center gap-1 font-bold text-focus hover:underline"
-            href="https://github.com/we-are-singular/vibe-check"
-            rel="noreferrer"
-            target="_blank"
-          >
-            Star Vibe Check on GitHub
-            <ArrowUpRight aria-hidden className="size-4" />
-          </a>
+          <div className="thank-you-links">
+            <a
+              className="inline-flex items-center gap-1 font-bold text-focus hover:underline"
+              href="https://vibe-check.wearesingular.com/"
+              rel="noreferrer"
+              target="_blank"
+            >
+              Visit Vibe Check
+              <ArrowUpRight aria-hidden className="size-4" />
+            </a>
+            <a
+              className="inline-flex items-center gap-1 font-bold text-focus hover:underline"
+              href="https://github.com/we-are-singular/vibe-check"
+              rel="noreferrer"
+              target="_blank"
+            >
+              Star Us on GitHub
+              <ArrowUpRight aria-hidden className="size-4" />
+            </a>
+          </div>
         </section>
       </div>
     </div>
+  )
+}
+
+function VibeMark(): React.JSX.Element {
+  return (
+    <svg aria-hidden="true" className="review-brand-mark" viewBox="0 0 256 256">
+      <path
+        className="review-brand-bubble"
+        d="M34 47C34 30 48 17 66 17h124c18 0 32 13 32 30v107c0 17-14 30-31 30h-91l-34 32c-9 8-23 0-20-12l6-20c-11-6-18-17-18-30V47Z"
+      />
+      <path
+        className="review-brand-heart"
+        d="m128 164-45-42c-15-15-15-39 0-50 15-13 34-9 45 6 11-15 30-19 45-6 15 11 15 35 0 50l-45 42Z"
+      />
+    </svg>
   )
 }
 

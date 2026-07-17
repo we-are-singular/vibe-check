@@ -43,7 +43,7 @@ export class ServeCommand extends VibeCheckCommand {
 
   directory = Option.String()
   name = Option.String("--name,-n", {
-    description: "Campaign title or review question (max 255 characters; default: vibe-check)",
+    description: 'Campaign title or review question (max 255 characters; default: "What do you think?")',
     required: false,
   })
 
@@ -202,7 +202,7 @@ function parsePort(value: string): number | null {
 
 /** Normalizes the optional campaign title at the CLI boundary before loading files. */
 export function parseCampaignTitle(value: string | undefined): string | null {
-  if (value === undefined) return "vibe-check"
+  if (value === undefined) return "What do you think?"
 
   const title = value.trim()
   return title.length === 0 || title.length > 255 ? null : title

@@ -100,8 +100,11 @@ describe("ViewerApp", () => {
 
     await screen.findByRole("heading", { name: "Thanks for sharing your perspective." })
     expect(screen.queryByTitle("Aurora")).toBeNull()
-    expect(screen.getByRole("link", { name: "Star Vibe Check on GitHub" }).getAttribute("href")).toBe(
+    expect(screen.getByRole("link", { name: "Star Us on GitHub" }).getAttribute("href")).toBe(
       "https://github.com/we-are-singular/vibe-check"
+    )
+    expect(screen.getByRole("link", { name: "Visit Vibe Check" }).getAttribute("href")).toBe(
+      "https://vibe-check.wearesingular.com/"
     )
     getHeaderGithubLink()
   })
@@ -133,8 +136,11 @@ describe("ViewerApp", () => {
     expect(screen.getByText("npx skills add we-are-singular/vibe-check").textContent).toBe(
       "npx skills add we-are-singular/vibe-check"
     )
-    expect(screen.getByRole("link", { name: "Star Vibe Check on GitHub" }).getAttribute("href")).toBe(
+    expect(screen.getByRole("link", { name: "Star Us on GitHub" }).getAttribute("href")).toBe(
       "https://github.com/we-are-singular/vibe-check"
+    )
+    expect(screen.getByRole("link", { name: "Visit Vibe Check" }).getAttribute("href")).toBe(
+      "https://vibe-check.wearesingular.com/"
     )
     getHeaderGithubLink()
 
@@ -152,8 +158,9 @@ describe("ViewerApp", () => {
     expect(helpButton).not.toBeNull()
     expect(reviewResponses.compareDocumentPosition(githubLink) & Node.DOCUMENT_POSITION_FOLLOWING).not.toBe(0)
     expect(githubLink.compareDocumentPosition(helpButton) & Node.DOCUMENT_POSITION_FOLLOWING).not.toBe(0)
-    expect(within(header).queryByRole("button", { name: "Previous Vibe" })).toBeNull()
-    expect(within(header).queryByRole("button", { name: "Next Vibe" })).toBeNull()
+    expect(within(header).getByRole("group", { name: "Preview width" }).hasAttribute("disabled")).toBe(true)
+    expect(within(header).getByRole("button", { name: "Previous Vibe" }).hasAttribute("disabled")).toBe(true)
+    expect(within(header).getByRole("button", { name: "Next Vibe" }).hasAttribute("disabled")).toBe(true)
     expect(within(header).queryByRole("button", { name: "Finish review" })).toBeNull()
     expect(within(thankYouCard).queryByRole("button", { name: "Review my responses" })).toBeNull()
 
@@ -200,6 +207,11 @@ describe("ViewerApp", () => {
     expect(screen.getByRole("dialog").textContent).toContain("Star rating")
     expect(screen.getByRole("dialog").textContent).toContain("More lit stars means a stronger fit.")
     await user.click(screen.getByRole("button", { name: "Got it" }))
+    await user.click(screen.getByRole("button", { name: "Rate this Vibe 4 stars" }))
+    await screen.findByTitle("Beacon")
+    await user.click(screen.getByRole("button", { name: "Rate this Vibe 4 stars" }))
+    await screen.findByRole("heading", { name: "Thanks for sharing your perspective." })
+    expect(screen.queryByRole("group", { name: "Preview width" })).toBeNull()
   })
 
   it("saves optional comments from Next and finishes after every Vibe", async () => {

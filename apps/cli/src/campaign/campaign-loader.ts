@@ -17,7 +17,7 @@ export type Campaign = {
 export class CampaignLoader {
   constructor(private readonly renderers: readonly VibeRenderer[]) {}
 
-  async load(directory: string, title = "vibe-check"): Promise<Campaign> {
+  async load(directory: string, title = "What do you think?"): Promise<Campaign> {
     const absoluteDirectory = resolve(normalizeCampaignDirectoryPath(directory))
     const entries = await this.readDirectory(absoluteDirectory)
     const candidateNames = entries

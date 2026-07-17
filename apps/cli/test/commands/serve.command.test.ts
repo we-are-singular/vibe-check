@@ -70,14 +70,14 @@ describe("serve", () => {
     expect(stringOption).toHaveBeenCalledWith(
       "--name,-n",
       expect.objectContaining({
-        description: expect.stringContaining("default: vibe-check"),
+        description: expect.stringContaining('default: "What do you think?"'),
         required: false,
       })
     )
   })
 
   it.each([
-    [undefined, "vibe-check"],
+    [undefined, "What do you think?"],
     ["  Which draft should we ship?  ", "Which draft should we ship?"],
   ])("loads the campaign with title %j", async (name, expectedTitle) => {
     const stdout = new PassThrough()

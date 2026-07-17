@@ -6,6 +6,7 @@ const PREVIEW_MODES = ["full", "wide", "tablet", "phone"] as const
 export type PreviewMode = (typeof PREVIEW_MODES)[number]
 
 type PreviewModePickerProps = {
+  disabled?: boolean
   onChange: (mode: PreviewMode) => void
   value: PreviewMode
 }
@@ -23,9 +24,13 @@ export function isPreviewMode(value: string | null): value is PreviewMode {
 }
 
 /** Lets a reviewer choose the width used for the candidate iframe. */
-export function PreviewModePicker({ onChange, value }: PreviewModePickerProps): React.JSX.Element {
+export function PreviewModePicker({ disabled = false, onChange, value }: PreviewModePickerProps): React.JSX.Element {
   return (
-    <fieldset className="flex gap-1 rounded-control border border-border bg-canvas p-1" aria-label="Preview width">
+    <fieldset
+      aria-label="Preview width"
+      className={`flex gap-1 rounded-control border border-border bg-canvas p-1 ${disabled ? "opacity-45" : ""}`}
+      disabled={disabled}
+    >
       <legend className="sr-only">Preview width</legend>
       {PREVIEW_MODES.map(mode => {
         const { Icon, title } = modeDetails[mode]
@@ -44,7 +49,9 @@ export function PreviewModePicker({ onChange, value }: PreviewModePickerProps): 
               value={mode}
             />
             <label
-              className="flex min-h-9 cursor-pointer items-center justify-center gap-1 rounded-subtle px-2 text-xs font-bold text-muted transition-colors duration-150 ease-ui hover:bg-border-subtle hover:text-ink peer-checked:bg-ink peer-checked:text-surface peer-focus-visible:outline-2 peer-focus-visible:outline-focus peer-focus-visible:outline-offset-2"
+              className={`flex min-h-9 items-center justify-center gap-1 rounded-subtle px-2 text-xs font-bold text-muted transition-colors duration-150 ease-ui peer-checked:bg-ink peer-checked:text-surface peer-focus-visible:outline-2 peer-focus-visible:outline-focus peer-focus-visible:outline-offset-2 ${
+                disabled ? "cursor-default" : "cursor-pointer hover:bg-border-subtle hover:text-ink"
+              }`}
               htmlFor={id}
               title={title}
             >

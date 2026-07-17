@@ -18,7 +18,7 @@ describe("normalizeCampaignDirectoryPath", () => {
 })
 
 describe("CampaignLoader", () => {
-  it("uses the lowercase default title and preserves a supplied title", async () => {
+  it("uses the default review question and preserves a supplied title", async () => {
     const directory = await mkdtemp(join(tmpdir(), "vibe-check-campaign-"))
     await Promise.all([
       writeFile(join(directory, "first.html"), "<p>First candidate</p>"),
@@ -27,7 +27,7 @@ describe("CampaignLoader", () => {
 
     try {
       const loader = new CampaignLoader([new HtmlFragmentRenderer()])
-      expect((await loader.load(directory)).title).toBe("vibe-check")
+      expect((await loader.load(directory)).title).toBe("What do you think?")
       expect((await loader.load(directory, "Which draft should we ship?")).title).toBe("Which draft should we ship?")
     } finally {
       await rm(directory, { force: true, recursive: true })
