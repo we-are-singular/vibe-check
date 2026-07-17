@@ -802,6 +802,11 @@ h2 {
   border-color: var(--coral);
   color: #fff;
 }
+.mock-verdict.keep {
+  background: var(--mint);
+  border-color: var(--mint);
+  color: var(--ink);
+}
 @media (max-width: 860px) {
   .step {
     grid-template-columns: 1fr;
@@ -822,15 +827,38 @@ h2 {
   margin-top: 44px;
 }
 .install-card {
+  --install-pull-x: 0px;
+  --install-pull-y: 0px;
+  --install-tilt-x: 0deg;
+  --install-tilt-y: 0deg;
+  --install-scale: 1;
+  position: relative;
+  z-index: 0;
   background: var(--ink);
   color: var(--cream);
   border-radius: 26px;
   padding: 32px;
   box-shadow: 0 30px 60px -30px rgba(26, 21, 35, 0.55);
+  transform: translate3d(var(--install-pull-x), var(--install-pull-y), 0) perspective(900px)
+    rotateX(var(--install-tilt-x)) rotateY(var(--install-tilt-y)) scale(var(--install-scale));
+  transition:
+    transform 600ms var(--ease-spring),
+    box-shadow 500ms var(--ease-out);
 }
 .install-card.skill {
   background: var(--violet);
   box-shadow: 0 30px 60px -30px rgba(108, 77, 246, 0.6);
+}
+.install-card.install-tracking {
+  --install-scale: 1.025;
+  z-index: 2;
+  box-shadow: 0 38px 68px -28px rgba(26, 21, 35, 0.62);
+  transition:
+    transform 180ms var(--ease-out),
+    box-shadow 300ms var(--ease-out);
+}
+.install-card.skill.install-tracking {
+  box-shadow: 0 38px 68px -28px rgba(108, 77, 246, 0.72);
 }
 .install-card h3 {
   font-size: 21px;
