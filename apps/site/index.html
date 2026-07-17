@@ -250,30 +250,194 @@
           The creator chooses one voting system when opening a Campaign. <br />
           Every system allows unanswered candidates, and voters can revise earlier feedback before the session ends.
         </p>
-        <div class="cards" data-reveal-group>
-          <div class="card" data-reveal>
-            <div class="glyph c">♥</div>
-            <h3>tinder <code>default</code></h3>
-            <p>
-              Fast triage: <strong>Pass</strong>, <strong>Keep</strong>, or <strong>Love</strong>. A Love counts as a
-              Keep with extra emphasis. The summary sorts by Loves, then Keeps.
-            </p>
+        <!-- Left rail picks the mechanic; the browser on the right reenacts it.
+             Auto-advances on a timer until a visitor picks one themselves. -->
+        <div class="showcase" data-reveal>
+          <div class="showcase-list" role="tablist" aria-label="Voting systems" aria-orientation="vertical">
+            <button
+              class="showcase-item active"
+              type="button"
+              role="tab"
+              id="tab-tinder"
+              aria-controls="panel-tinder"
+              aria-selected="true"
+              data-voting="tinder"
+            >
+              <span class="glyph c">♥</span>
+              <span class="showcase-copy">
+                <strong>tinder <code>default</code></strong>
+                <span>Pass, Keep, or Love — fast triage.</span>
+              </span>
+              <span class="bar" aria-hidden="true"><span></span></span>
+            </button>
+            <button
+              class="showcase-item"
+              type="button"
+              role="tab"
+              id="tab-stars"
+              aria-controls="panel-stars"
+              aria-selected="false"
+              data-voting="stars"
+            >
+              <span class="glyph s">★</span>
+              <span class="showcase-copy">
+                <strong>stars</strong>
+                <span>One to five stars for close calls.</span>
+              </span>
+              <span class="bar" aria-hidden="true"><span></span></span>
+            </button>
+            <button
+              class="showcase-item"
+              type="button"
+              role="tab"
+              id="tab-comment"
+              aria-controls="panel-comment"
+              aria-selected="false"
+              data-voting="comment"
+            >
+              <span class="glyph v">✎</span>
+              <span class="showcase-copy">
+                <strong>comment</strong>
+                <span>Written signal, no ranking.</span>
+              </span>
+              <span class="bar" aria-hidden="true"><span></span></span>
+            </button>
           </div>
-          <div class="card" data-reveal>
-            <div class="glyph s">★</div>
-            <h3>stars</h3>
-            <p>
-              One-to-five stars per Vibe for relative ranking when options are close. The summary ranks by average
-              rating, then rating count.
-            </p>
-          </div>
-          <div class="card" data-reveal>
-            <div class="glyph v">❝</div>
-            <h3>comment</h3>
-            <p>
-              Optional written feedback per Vibe — continue without writing anything. The summary reports comment counts
-              and lists what people said. No ranking, just signal.
-            </p>
+
+          <div class="showcase-browser">
+            <div class="browser-bar">
+              <div class="lights" aria-hidden="true"><span></span><span></span><span></span></div>
+              <span class="url mono" id="showcase-url">127.0.0.1:4173 · --voting tinder</span>
+            </div>
+            <div class="showcase-panels">
+              <div class="showcase-panel panel-tinder active" id="panel-tinder" role="tabpanel" aria-labelledby="tab-tinder">
+                <div class="stage-top">
+                  <span class="stage-label">Which hero wins?</span>
+                  <span class="stage-progress">Vibe 2 of 3</span>
+                </div>
+                <!-- Extruded-spin illusion: stacked SVG layers on a preserve-3d spindle. -->
+                <div class="obj-zone" aria-hidden="true">
+                  <div class="obj-shadow"></div>
+                  <div class="obj-float">
+                    <div class="obj-tilt">
+                      <div class="obj3d">
+                        <svg viewBox="0 0 24 24" style="--z: -10px; --c: #d63d5e"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" /></svg>
+                        <svg viewBox="0 0 24 24" style="--z: -7.5px; --c: #d63d5e"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" /></svg>
+                        <svg viewBox="0 0 24 24" style="--z: -5px; --c: #d63d5e"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" /></svg>
+                        <svg viewBox="0 0 24 24" style="--z: -2.5px; --c: #d63d5e"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" /></svg>
+                        <svg viewBox="0 0 24 24" style="--z: 0px; --c: #ff5a7a"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" /></svg>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div class="t-demo" aria-hidden="true">
+                  <div class="t-cards">
+                    <div class="t-card t-card-1"><span class="file-chip mono">01-bold-hero.html</span></div>
+                    <div class="t-card t-card-2"><span class="file-chip mono">02-quiet-hero.md</span></div>
+                    <div class="t-card t-card-3"><span class="file-chip mono">03-weird-hero.html</span></div>
+                    <div class="t-stamp st-keep">✓ Kept</div>
+                    <div class="t-stamp st-love">♥ Loved</div>
+                    <div class="t-stamp st-pass">✕ Passed</div>
+                  </div>
+                  <div class="t-verdicts">
+                    <span class="verdict v-pass">Pass</span>
+                    <span class="verdict v-keep">Keep</span>
+                    <span class="verdict v-love"
+                      >♥ Love<i class="hf hf-1">♥</i><i class="hf hf-2">♥</i><i class="hf hf-3">♥</i></span
+                    >
+                  </div>
+                </div>
+                <p class="panel-caption">
+                  A Love counts as a Keep with extra emphasis — the summary sorts by Loves, then Keeps.
+                </p>
+              </div>
+
+              <div
+                class="showcase-panel panel-stars"
+                id="panel-stars"
+                role="tabpanel"
+                aria-labelledby="tab-stars"
+                aria-hidden="true"
+              >
+                <div class="stage-top">
+                  <span class="stage-label">Which hero wins?</span>
+                  <span class="stage-progress">Vibe 2 of 3</span>
+                </div>
+                <div class="obj-zone" aria-hidden="true">
+                  <div class="obj-shadow"></div>
+                  <div class="obj-float">
+                    <div class="obj-tilt">
+                      <div class="obj3d">
+                        <svg viewBox="0 0 24 24" style="--z: -10px; --c: #cf9a0a"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" /></svg>
+                        <svg viewBox="0 0 24 24" style="--z: -7.5px; --c: #cf9a0a"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" /></svg>
+                        <svg viewBox="0 0 24 24" style="--z: -5px; --c: #cf9a0a"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" /></svg>
+                        <svg viewBox="0 0 24 24" style="--z: -2.5px; --c: #cf9a0a"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" /></svg>
+                        <svg viewBox="0 0 24 24" style="--z: 0px; --c: #ffc531"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" /></svg>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div class="s-demo" aria-hidden="true">
+                  <div class="s-stars">
+                    <span class="st"><svg viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" /></svg></span>
+                    <span class="st"><svg viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" /></svg></span>
+                    <span class="st"><svg viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" /></svg></span>
+                    <span class="st"><svg viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" /></svg></span>
+                    <span class="st"><svg viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" /></svg></span>
+                  </div>
+                  <div class="s-readout">★ 5.0 — recorded</div>
+                </div>
+                <p class="panel-caption">
+                  One-to-five stars per Vibe — the summary ranks by average rating, then rating count.
+                </p>
+              </div>
+
+              <div
+                class="showcase-panel panel-comment"
+                id="panel-comment"
+                role="tabpanel"
+                aria-labelledby="tab-comment"
+                aria-hidden="true"
+              >
+                <div class="stage-top">
+                  <span class="stage-label">Which hero wins?</span>
+                  <span class="stage-progress">Vibe 2 of 3</span>
+                </div>
+                <div class="obj-zone" aria-hidden="true">
+                  <div class="obj-shadow"></div>
+                  <div class="obj-float">
+                    <div class="obj-tilt">
+                      <div class="obj3d">
+                        <svg viewBox="0 0 24 24" style="--z: -10px; --c: #4b34c6"><path d="M21.731 2.269a2.625 2.625 0 0 0-3.712 0l-1.157 1.157 3.712 3.712 1.157-1.157a2.625 2.625 0 0 0 0-3.712ZM19.513 8.199l-3.712-3.712-12.15 12.15a5.25 5.25 0 0 0-1.32 2.214l-.8 2.685a.75.75 0 0 0 .933.933l2.685-.8a5.25 5.25 0 0 0 2.214-1.32L19.513 8.2Z" /></svg>
+                        <svg viewBox="0 0 24 24" style="--z: -7.5px; --c: #4b34c6"><path d="M21.731 2.269a2.625 2.625 0 0 0-3.712 0l-1.157 1.157 3.712 3.712 1.157-1.157a2.625 2.625 0 0 0 0-3.712ZM19.513 8.199l-3.712-3.712-12.15 12.15a5.25 5.25 0 0 0-1.32 2.214l-.8 2.685a.75.75 0 0 0 .933.933l2.685-.8a5.25 5.25 0 0 0 2.214-1.32L19.513 8.2Z" /></svg>
+                        <svg viewBox="0 0 24 24" style="--z: -5px; --c: #4b34c6"><path d="M21.731 2.269a2.625 2.625 0 0 0-3.712 0l-1.157 1.157 3.712 3.712 1.157-1.157a2.625 2.625 0 0 0 0-3.712ZM19.513 8.199l-3.712-3.712-12.15 12.15a5.25 5.25 0 0 0-1.32 2.214l-.8 2.685a.75.75 0 0 0 .933.933l2.685-.8a5.25 5.25 0 0 0 2.214-1.32L19.513 8.2Z" /></svg>
+                        <svg viewBox="0 0 24 24" style="--z: -2.5px; --c: #4b34c6"><path d="M21.731 2.269a2.625 2.625 0 0 0-3.712 0l-1.157 1.157 3.712 3.712 1.157-1.157a2.625 2.625 0 0 0 0-3.712ZM19.513 8.199l-3.712-3.712-12.15 12.15a5.25 5.25 0 0 0-1.32 2.214l-.8 2.685a.75.75 0 0 0 .933.933l2.685-.8a5.25 5.25 0 0 0 2.214-1.32L19.513 8.2Z" /></svg>
+                        <svg viewBox="0 0 24 24" style="--z: 0px; --c: #6c4df6"><path d="M21.731 2.269a2.625 2.625 0 0 0-3.712 0l-1.157 1.157 3.712 3.712 1.157-1.157a2.625 2.625 0 0 0 0-3.712ZM19.513 8.199l-3.712-3.712-12.15 12.15a5.25 5.25 0 0 0-1.32 2.214l-.8 2.685a.75.75 0 0 0 .933.933l2.685-.8a5.25 5.25 0 0 0 2.214-1.32L19.513 8.2Z" /></svg>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div class="c-demo" aria-hidden="true">
+                  <div class="c-box">
+                    <div class="c-box-label">Comment <span>(optional)</span></div>
+                    <div class="c-field">
+                      <span class="c-typed">the pink one. ship it.</span><span class="c-caret-wrap"><span class="caret"></span></span>
+                    </div>
+                    <div class="c-row">
+                      <span class="c-skip">Continue without comment →</span>
+                      <span class="verdict c-post">Post comment</span>
+                    </div>
+                  </div>
+                  <div class="c-bubble">
+                    <span class="c-check">✓</span>
+                    <span>“the pink one. ship it.” <span class="c-who">— recorded on 02-quiet-hero.md</span></span>
+                  </div>
+                </div>
+                <p class="panel-caption">
+                  Comments are optional — voters can continue without writing. The summary lists them all; no ranking.
+                </p>
+              </div>
+            </div>
           </div>
         </div>
       </section>
@@ -705,6 +869,102 @@
       })()
 
       DEMO.start()
+
+      /* ---------- voting showcase ---------- */
+      // Left rail picks the mechanic, right browser reenacts it. Auto-advances on a
+      // timer with a progress bar; a manual pick buys extra dwell time, and hovering
+      // the stage or hiding the tab pauses the cycle.
+      const SHOWCASE = (() => {
+        const root = document.querySelector(".showcase")
+        if (!root) return { start() {} }
+        const tabs = [...root.querySelectorAll(".showcase-item")]
+        const panels = [...root.querySelectorAll(".showcase-panel")]
+        const urlEl = document.getElementById("showcase-url")
+        const stage = root.querySelector(".showcase-browser")
+        const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches
+        const AUTO_MS = 6500
+        const PAUSE_MS = 8500 // extra dwell after a manual pick
+        let index = 0
+        let timer = null
+
+        // Restart the active tab's progress bar for a fresh `ms` countdown.
+        function restartBar(ms) {
+          const span = tabs[index].querySelector(".bar span")
+          if (!span) return
+          span.style.animation = "none"
+          void span.offsetWidth // reflow: rewind the CSS animation to zero
+          span.style.animation = ""
+          span.style.animationDuration = `${ms}ms`
+        }
+
+        function schedule(ms) {
+          if (reduced) return
+          clearTimeout(timer)
+          timer = setTimeout(() => select((index + 1) % tabs.length, false), ms)
+        }
+
+        function select(i, manual) {
+          index = i
+          tabs.forEach((tab, k) => {
+            const on = k === i
+            tab.classList.toggle("active", on)
+            tab.setAttribute("aria-selected", on ? "true" : "false")
+          })
+          panels.forEach((panel, k) => {
+            const on = k === i
+            panel.classList.toggle("active", on)
+            panel.setAttribute("aria-hidden", on ? "false" : "true")
+          })
+          urlEl.textContent = `127.0.0.1:4173 · --voting ${tabs[i].dataset.voting}`
+          const dwell = manual ? AUTO_MS + PAUSE_MS : AUTO_MS
+          if (!reduced) {
+            restartBar(dwell)
+            schedule(dwell)
+          }
+        }
+
+        tabs.forEach((tab, i) => {
+          tab.addEventListener("click", () => select(i, true))
+        })
+        root.querySelector(".showcase-list").addEventListener("keydown", e => {
+          const delta = { ArrowDown: 1, ArrowRight: 1, ArrowUp: -1, ArrowLeft: -1 }[e.key]
+          if (!delta) return
+          e.preventDefault()
+          const next = (index + delta + tabs.length) % tabs.length
+          tabs[next].focus()
+          select(next, true)
+        })
+        stage.addEventListener("mouseenter", () => {
+          clearTimeout(timer)
+          root.classList.add("hovering")
+        })
+        stage.addEventListener("mouseleave", () => {
+          root.classList.remove("hovering")
+          if (reduced) return
+          restartBar(AUTO_MS)
+          schedule(AUTO_MS)
+        })
+        document.addEventListener("visibilitychange", () => {
+          if (reduced) return
+          if (document.hidden) {
+            clearTimeout(timer)
+          } else {
+            restartBar(AUTO_MS)
+            schedule(AUTO_MS)
+          }
+        })
+
+        return {
+          start() {
+            if (reduced) return
+            root.classList.add("timed")
+            restartBar(AUTO_MS)
+            schedule(AUTO_MS)
+          },
+        }
+      })()
+
+      SHOWCASE.start()
 
       /* ---------- scroll reveal ---------- */
       // Armed only here (never in CSS) so no-JS and reduced-motion visitors see everything.

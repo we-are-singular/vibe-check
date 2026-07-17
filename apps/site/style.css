@@ -1236,6 +1236,926 @@ footer {
   color: var(--coral);
 }
 
+/* ---------- voting showcase ---------- */
+/* Left rail of mechanics (30%) + browser reenactment (70%). The rail stretches to
+   match the browser height; the active tab owns the auto-advance progress bar. */
+.showcase {
+  display: grid;
+  grid-template-columns: minmax(250px, 3fr) minmax(0, 7fr);
+  gap: 26px;
+  margin-top: 44px;
+  align-items: stretch;
+}
+.showcase-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.showcase-item {
+  position: relative;
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 16px 18px 20px;
+  background: rgba(255, 255, 255, 0.55);
+  border: 1.5px solid var(--card-border);
+  border-radius: 20px;
+  font-family: inherit;
+  text-align: left;
+  cursor: pointer;
+  overflow: hidden;
+  transition:
+    background 200ms var(--ease-out),
+    border-color 200ms var(--ease-out),
+    transform 300ms var(--ease-spring),
+    box-shadow 300ms var(--ease-out);
+}
+.showcase-item .glyph {
+  width: 40px;
+  height: 40px;
+  border-radius: 13px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 19px;
+  color: #fff;
+  flex: none;
+  transition: transform 300ms var(--ease-spring);
+}
+.showcase-copy {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+}
+.showcase-copy strong {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 16.5px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+.showcase-copy strong code {
+  background: #f4effc;
+  color: var(--violet);
+  border-radius: 6px;
+  padding: 1px 6px;
+  font-size: 11.5px;
+  font-weight: 700;
+}
+.showcase-copy > span {
+  font-size: 13px;
+  color: var(--ink-soft);
+  line-height: 1.45;
+}
+.showcase-item.active {
+  background: #fff;
+  border-color: var(--ink);
+  box-shadow: 0 20px 40px -28px rgba(26, 21, 35, 0.4);
+}
+.showcase-item:focus-visible {
+  outline: 2.5px solid var(--violet);
+  outline-offset: 2px;
+}
+.showcase-item .bar {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 3px;
+  background: rgba(26, 21, 35, 0.08);
+  opacity: 0;
+  transition: opacity 200ms var(--ease-out);
+}
+.showcase-item.active .bar {
+  opacity: 1;
+}
+.showcase-item .bar span {
+  display: block;
+  height: 100%;
+  width: 0;
+  background: linear-gradient(90deg, var(--coral), var(--violet));
+}
+/* `.timed` is JS-only — without it (no-JS) the bar never pretends a countdown. */
+.showcase.timed .showcase-item.active .bar span {
+  animation: bar-fill 6.5s linear forwards;
+}
+.showcase.hovering .bar span {
+  animation-play-state: paused;
+}
+@keyframes bar-fill {
+  from {
+    width: 0;
+  }
+  to {
+    width: 100%;
+  }
+}
+
+.showcase-browser {
+  background: #fff;
+  border: 1px solid rgba(26, 21, 35, 0.08);
+  border-radius: 22px;
+  overflow: hidden;
+  box-shadow: 0 40px 80px -40px rgba(26, 21, 35, 0.4);
+}
+.showcase-panels {
+  position: relative;
+  height: 356px;
+}
+.showcase-panel {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  padding: 18px 26px 46px;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(14px) scale(0.985);
+  transition:
+    opacity 400ms var(--ease-out),
+    transform 520ms var(--ease-spring),
+    visibility 0s linear 520ms;
+}
+.showcase-panel.active {
+  opacity: 1;
+  visibility: visible;
+  transform: none;
+  transition-delay: 0s;
+}
+.showcase-panel .stage-top {
+  margin-bottom: 6px;
+}
+.panel-caption {
+  position: absolute;
+  left: 26px;
+  right: 26px;
+  bottom: 15px;
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--ink-faint);
+}
+
+/* Floating pseudo-3D object: an SVG silhouette stacked into an extruded "coin"
+   (preserve-3d layers), spun on a tilted spindle with a synced floor shadow.
+   Animations live under `.active` so each panel restarts fresh when selected. */
+.obj-zone {
+  position: absolute;
+  top: 34px;
+  right: 30px;
+  width: 100px;
+  height: 126px;
+  perspective: 640px;
+  pointer-events: none;
+  z-index: 2;
+}
+.obj-float {
+  position: absolute;
+  inset: 0 0 24px;
+}
+.obj-tilt {
+  width: 100%;
+  height: 100%;
+  transform: rotateX(-14deg);
+  transform-style: preserve-3d;
+}
+.obj3d {
+  position: absolute;
+  inset: 0;
+  margin: auto;
+  width: 86px;
+  height: 86px;
+  transform-style: preserve-3d;
+}
+.obj3d svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  transform: translateZ(var(--z));
+}
+.obj3d path {
+  fill: var(--c);
+}
+.obj-shadow {
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  width: 72px;
+  height: 14px;
+  border-radius: 50%;
+  background: rgba(26, 21, 35, 0.22);
+  filter: blur(4px);
+  transform: translateX(-50%);
+}
+.showcase-panel.active .obj3d {
+  animation: obj-spin 7s linear infinite;
+}
+.showcase-panel.active .obj-float {
+  animation: obj-bob 2.7s ease-in-out infinite alternate;
+}
+.showcase-panel.active .obj-shadow {
+  animation: obj-shadow 2.7s ease-in-out infinite alternate;
+}
+@keyframes obj-spin {
+  to {
+    transform: rotateY(360deg);
+  }
+}
+@keyframes obj-bob {
+  from {
+    transform: translateY(-7px);
+  }
+  to {
+    transform: translateY(9px);
+  }
+}
+@keyframes obj-shadow {
+  from {
+    transform: translateX(-50%) scale(0.8);
+    opacity: 0.26;
+  }
+  to {
+    transform: translateX(-50%) scale(1.08);
+    opacity: 0.15;
+  }
+}
+
+/* tinder panel: three cards cycle through keep → love → pass. 9s loop; each card
+   enters, its verdict button presses, a stamp lands, and it swipes off. */
+.t-demo {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+.t-cards {
+  position: relative;
+  height: 118px;
+}
+.t-card {
+  position: absolute;
+  inset: 0;
+  border-radius: 15px;
+  display: flex;
+  align-items: flex-end;
+  padding: 11px;
+  opacity: 0;
+  box-shadow: inset 0 0 0 1px rgba(26, 21, 35, 0.06);
+}
+.t-card .file-chip {
+  background: rgba(255, 255, 255, 0.94);
+  border-radius: 999px;
+  padding: 5px 13px;
+  font-size: 11.5px;
+  font-weight: 700;
+  color: var(--ink);
+}
+.t-card-1 {
+  background: linear-gradient(120deg, #ff5a7a, #6c4df6 55%, #3eddb4);
+  opacity: 1; /* static fallback frame for no-JS / reduced motion */
+}
+.t-card-2 {
+  background: linear-gradient(120deg, #fff6ec, #ffc531);
+}
+.t-card-3 {
+  background: linear-gradient(120deg, #1a1523, #6c4df6);
+}
+.t-stamp {
+  position: absolute;
+  left: 50%;
+  top: 42%;
+  padding: 6px 15px;
+  border-radius: 11px;
+  background: rgba(255, 255, 255, 0.94);
+  box-shadow: 0 8px 20px rgba(26, 21, 35, 0.28);
+  font-size: 15px;
+  font-weight: 700;
+  opacity: 0;
+  transform: translate(-50%, -50%) rotate(-9deg);
+}
+.st-keep {
+  color: #0f8a68;
+}
+.st-love {
+  color: var(--coral);
+}
+.st-pass {
+  color: var(--ink-soft);
+}
+.t-verdicts {
+  display: flex;
+  gap: 10px;
+  margin-top: 14px;
+}
+.t-verdicts .verdict {
+  position: relative;
+  cursor: default;
+  text-align: center;
+}
+.hf {
+  position: absolute;
+  top: -4px;
+  font-style: normal;
+  color: var(--coral);
+  opacity: 0;
+  pointer-events: none;
+}
+.hf-1 {
+  left: 28%;
+  font-size: 12px;
+  --dx: -16px;
+}
+.hf-2 {
+  left: 48%;
+  font-size: 16px;
+  --dx: 3px;
+}
+.hf-3 {
+  left: 66%;
+  font-size: 12px;
+  --dx: 18px;
+}
+.panel-tinder.active .t-card-1 {
+  animation: t-card-1 9s var(--ease-in-out) infinite;
+}
+.panel-tinder.active .t-card-2 {
+  animation: t-card-2 9s var(--ease-in-out) infinite;
+}
+.panel-tinder.active .t-card-3 {
+  animation: t-card-3 9s var(--ease-in-out) infinite;
+}
+.panel-tinder.active .v-keep {
+  animation: t-press-keep 9s linear infinite;
+}
+.panel-tinder.active .v-love {
+  animation: t-press-love 9s linear infinite;
+}
+.panel-tinder.active .v-pass {
+  animation: t-press-pass 9s linear infinite;
+}
+.panel-tinder.active .st-keep {
+  animation: st-keep 9s var(--ease-out) infinite;
+}
+.panel-tinder.active .st-love {
+  animation: st-love 9s var(--ease-out) infinite;
+}
+.panel-tinder.active .st-pass {
+  animation: st-pass 9s var(--ease-out) infinite;
+}
+.panel-tinder.active .hf {
+  animation: t-heart 9s linear infinite;
+}
+@keyframes t-card-1 {
+  0% {
+    opacity: 0;
+    transform: translateX(64px) rotate(2deg);
+  }
+  5%,
+  27% {
+    opacity: 1;
+    transform: none;
+  }
+  33%,
+  100% {
+    opacity: 0;
+    transform: translateX(84px) rotate(5deg);
+  }
+}
+@keyframes t-card-2 {
+  0%,
+  35.5% {
+    opacity: 0;
+    transform: translateX(64px) rotate(2deg);
+  }
+  41%,
+  64% {
+    opacity: 1;
+    transform: none;
+  }
+  70%,
+  100% {
+    opacity: 0;
+    transform: translateY(-72px) rotate(-5deg);
+  }
+}
+@keyframes t-card-3 {
+  0%,
+  72% {
+    opacity: 0;
+    transform: translateX(64px) rotate(2deg);
+  }
+  78%,
+  94.5% {
+    opacity: 1;
+    transform: none;
+  }
+  100% {
+    opacity: 0;
+    transform: translateX(-84px) rotate(-5deg);
+  }
+}
+@keyframes t-press-keep {
+  0%,
+  23.5% {
+    transform: none;
+    background: #fff;
+    border-color: var(--card-border);
+    color: var(--ink-faint);
+  }
+  25%,
+  29.5% {
+    transform: scale(0.9);
+    background: var(--mint);
+    border-color: var(--mint);
+    color: var(--ink);
+  }
+  31.5%,
+  100% {
+    transform: none;
+    background: #fff;
+    border-color: var(--card-border);
+    color: var(--ink-faint);
+  }
+}
+@keyframes t-press-love {
+  0%,
+  60% {
+    transform: none;
+    background: #fff;
+    border-color: var(--card-border);
+    color: var(--ink-faint);
+  }
+  62%,
+  66.5% {
+    transform: scale(0.9);
+    background: var(--coral);
+    border-color: var(--coral);
+    color: #fff;
+  }
+  68.5%,
+  100% {
+    transform: none;
+    background: #fff;
+    border-color: var(--card-border);
+    color: var(--ink-faint);
+  }
+}
+@keyframes t-press-pass {
+  0%,
+  93% {
+    transform: none;
+    background: #fff;
+    border-color: var(--card-border);
+    color: var(--ink-faint);
+  }
+  94.5%,
+  97.5% {
+    transform: scale(0.9);
+    background: #efe9f7;
+    border-color: #e2d9ef;
+    color: var(--ink-soft);
+  }
+  99%,
+  100% {
+    transform: none;
+    background: #fff;
+    border-color: var(--card-border);
+    color: var(--ink-faint);
+  }
+}
+@keyframes st-keep {
+  0%,
+  26% {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(1.6) rotate(-9deg);
+  }
+  28.5%,
+  32% {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1) rotate(-9deg);
+  }
+  34.5%,
+  100% {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(1) rotate(-9deg);
+  }
+}
+@keyframes st-love {
+  0%,
+  62.5% {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(1.6) rotate(-9deg);
+  }
+  65%,
+  69.5% {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1) rotate(-9deg);
+  }
+  72%,
+  100% {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(1) rotate(-9deg);
+  }
+}
+@keyframes st-pass {
+  0%,
+  94.5% {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(1.6) rotate(8deg);
+  }
+  96.5%,
+  98.5% {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1) rotate(8deg);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(1) rotate(8deg);
+  }
+}
+@keyframes t-heart {
+  0%,
+  61.5% {
+    opacity: 0;
+    transform: translate(0, 0) scale(0.5);
+  }
+  63% {
+    opacity: 1;
+  }
+  71%,
+  100% {
+    opacity: 0;
+    transform: translate(var(--dx, 0px), -52px) scale(1.15);
+  }
+}
+
+/* stars panel: stars fill 1→5 with a pop, the readout lands, then they drain 5→1. */
+.s-demo {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 18px;
+}
+.s-stars {
+  display: flex;
+  gap: 12px;
+}
+.s-stars .st {
+  display: block;
+  width: 50px;
+  height: 50px;
+  color: #e7dff3;
+}
+.s-stars .st svg {
+  width: 100%;
+  height: 100%;
+  fill: currentColor;
+}
+/* Static fallback frame: three of five filled. Keyframes override during the loop. */
+.s-stars .st:nth-child(-n + 3) {
+  color: var(--sunny);
+}
+.s-readout {
+  display: inline-block;
+  background: #faf7ff;
+  border: 1px solid var(--card-border);
+  border-radius: 999px;
+  padding: 8px 18px;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--ink-soft);
+  opacity: 0;
+}
+.panel-stars.active .st:nth-child(1) {
+  animation: star-1 8s linear infinite;
+}
+.panel-stars.active .st:nth-child(2) {
+  animation: star-2 8s linear infinite;
+}
+.panel-stars.active .st:nth-child(3) {
+  animation: star-3 8s linear infinite;
+}
+.panel-stars.active .st:nth-child(4) {
+  animation: star-4 8s linear infinite;
+}
+.panel-stars.active .st:nth-child(5) {
+  animation: star-5 8s linear infinite;
+}
+.panel-stars.active .s-readout {
+  animation: star-readout 8s var(--ease-out) infinite;
+}
+@keyframes star-1 {
+  0%,
+  6.5% {
+    color: #e7dff3;
+    transform: none;
+  }
+  8.7% {
+    color: var(--sunny);
+    transform: scale(1.5) rotate(-12deg);
+  }
+  10.5%,
+  89.5% {
+    color: var(--sunny);
+    transform: none;
+  }
+  91.5%,
+  100% {
+    color: #e7dff3;
+    transform: none;
+  }
+}
+@keyframes star-2 {
+  0%,
+  13.3% {
+    color: #e7dff3;
+    transform: none;
+  }
+  15.6% {
+    color: var(--sunny);
+    transform: scale(1.5) rotate(-12deg);
+  }
+  17.4%,
+  83.3% {
+    color: var(--sunny);
+    transform: none;
+  }
+  85.4%,
+  100% {
+    color: #e7dff3;
+    transform: none;
+  }
+}
+@keyframes star-3 {
+  0%,
+  20.2% {
+    color: #e7dff3;
+    transform: none;
+  }
+  22.4% {
+    color: var(--sunny);
+    transform: scale(1.5) rotate(-12deg);
+  }
+  24.2%,
+  77% {
+    color: var(--sunny);
+    transform: none;
+  }
+  79.1%,
+  100% {
+    color: #e7dff3;
+    transform: none;
+  }
+}
+@keyframes star-4 {
+  0%,
+  27% {
+    color: #e7dff3;
+    transform: none;
+  }
+  29.3% {
+    color: var(--sunny);
+    transform: scale(1.5) rotate(-12deg);
+  }
+  31.1%,
+  70.8% {
+    color: var(--sunny);
+    transform: none;
+  }
+  72.9%,
+  100% {
+    color: #e7dff3;
+    transform: none;
+  }
+}
+@keyframes star-5 {
+  0%,
+  33.9% {
+    color: #e7dff3;
+    transform: none;
+  }
+  36.2% {
+    color: var(--sunny);
+    transform: scale(1.5) rotate(-12deg);
+  }
+  38%,
+  63.9% {
+    color: var(--sunny);
+    transform: none;
+  }
+  66%,
+  100% {
+    color: #e7dff3;
+    transform: none;
+  }
+}
+@keyframes star-readout {
+  0%,
+  39% {
+    opacity: 0;
+    transform: translateY(8px) scale(0.9);
+  }
+  42%,
+  60% {
+    opacity: 1;
+    transform: none;
+  }
+  64%,
+  100% {
+    opacity: 0;
+    transform: translateY(-6px) scale(0.95);
+  }
+}
+
+/* comment panel: mono typewriter, the post button presses, the recorded bubble lands. */
+.c-demo {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+.c-box {
+  border: 1.5px solid var(--card-border);
+  border-radius: 16px;
+  padding: 14px 16px;
+  background: #fff;
+}
+.c-box-label {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+}
+.c-box-label span {
+  text-transform: none;
+  letter-spacing: 0;
+  font-weight: 500;
+}
+.c-field {
+  margin-top: 9px;
+  min-height: 22px;
+  font-family: "JetBrains Mono", ui-monospace, monospace;
+  font-size: 13px;
+  color: var(--ink);
+  white-space: nowrap;
+}
+.c-typed {
+  display: inline-block;
+  width: 22ch;
+  overflow: hidden;
+  vertical-align: bottom;
+}
+.c-caret-wrap {
+  display: inline-block;
+  vertical-align: bottom;
+  margin-left: 1px;
+}
+.c-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-top: 12px;
+}
+.c-skip {
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--ink-faint);
+}
+.c-row .verdict {
+  flex: none;
+  padding: 9px 18px;
+  font-size: 13px;
+  cursor: default;
+}
+.c-bubble {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  margin-top: 14px;
+  background: #faf7ff;
+  border: 1px solid var(--card-border);
+  border-radius: 14px;
+  padding: 11px 15px;
+  font-size: 13.5px;
+  color: var(--ink-soft);
+  opacity: 0;
+}
+.c-check {
+  color: #0f8a68;
+  font-weight: 700;
+}
+.c-who {
+  color: var(--ink-faint);
+  font-size: 12px;
+}
+.panel-comment.active .c-typed {
+  animation: c-type 9s linear infinite;
+}
+.panel-comment.active .c-caret-wrap {
+  animation: c-caret 9s linear infinite;
+}
+.panel-comment.active .c-post {
+  animation: c-post 9s linear infinite;
+}
+.panel-comment.active .c-bubble {
+  animation: c-bubble 9s var(--ease-out) infinite;
+}
+@keyframes c-type {
+  0% {
+    width: 0;
+    animation-timing-function: steps(22, end); /* per-keyframe: typewriter the 0→45% span */
+  }
+  45%,
+  57% {
+    width: 22ch;
+  }
+  57.1%,
+  100% {
+    width: 0;
+  }
+}
+@keyframes c-caret {
+  0%,
+  56% {
+    opacity: 1;
+  }
+  57%,
+  100% {
+    opacity: 0;
+  }
+}
+@keyframes c-post {
+  0%,
+  49% {
+    transform: none;
+    background: #fff;
+    border-color: var(--card-border);
+    color: var(--ink-faint);
+  }
+  51.5%,
+  55% {
+    transform: scale(0.92);
+    background: var(--violet);
+    border-color: var(--violet);
+    color: #fff;
+  }
+  57%,
+  100% {
+    transform: none;
+    background: #fff;
+    border-color: var(--card-border);
+    color: var(--ink-faint);
+  }
+}
+@keyframes c-bubble {
+  0%,
+  57% {
+    opacity: 0;
+    transform: translateY(10px) scale(0.96);
+  }
+  60%,
+  89% {
+    opacity: 1;
+    transform: none;
+  }
+  93%,
+  100% {
+    opacity: 0;
+    transform: translateY(-6px) scale(0.98);
+  }
+}
+
+@media (max-width: 860px) {
+  .showcase {
+    grid-template-columns: 1fr;
+  }
+  .showcase-panels {
+    height: 380px;
+  }
+}
+@media (max-width: 640px) {
+  .obj-zone {
+    width: 72px;
+    height: 96px;
+    top: 40px;
+    right: 18px;
+  }
+  .obj3d {
+    width: 60px;
+    height: 60px;
+  }
+  .c-skip {
+    display: none;
+  }
+}
+
 /* Hover & press motion: real pointers with a motion preference only.
    Touch devices fire hover on tap; reduced-motion users get color feedback only. */
 @media (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
@@ -1298,6 +2218,12 @@ footer {
   .verdict:hover {
     transform: translateY(-2px);
   }
+  .showcase-item:hover {
+    transform: translateX(4px);
+  }
+  .showcase-item:hover .glyph {
+    transform: rotate(0deg) scale(1.07);
+  }
 }
 
 /* Scroll reveal — armed by JS only, so no-JS and reduced-motion stay fully visible. */
@@ -1341,5 +2267,9 @@ footer {
   .verdict {
     transition-property: background, color, border-color;
     transform: none !important;
+  }
+  /* The auto-advance bar only decorates the countdown; gone when motion is reduced. */
+  .showcase-item .bar {
+    display: none;
   }
 }
