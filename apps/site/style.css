@@ -946,14 +946,61 @@ h2 {
 
 /* oss */
 .oss-panel {
+  --oss-pointer-x: 50%;
+  --oss-pointer-y: 50%;
+  --oss-pull-x: 0px;
+  --oss-pull-y: 0px;
+  --oss-tilt-x: 0deg;
+  --oss-tilt-y: 0deg;
+  --oss-radius: 28px;
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
   margin-top: 44px;
-  background: linear-gradient(135deg, var(--violet), var(--coral));
-  border-radius: 28px;
+  background: var(--violet);
+  border-radius: var(--oss-radius);
   padding: 46px 40px;
   color: #fff;
   text-align: center;
   box-shadow: 0 40px 70px -35px rgba(255, 90, 122, 0.55);
-  transform: rotate(-0.4deg);
+  transform: translate3d(var(--oss-pull-x), var(--oss-pull-y), 0) perspective(900px) rotateX(var(--oss-tilt-x))
+    rotateY(var(--oss-tilt-y)) rotate(-0.4deg);
+  transition:
+    transform 600ms var(--ease-spring),
+    border-radius 500ms var(--ease-spring),
+    box-shadow 500ms var(--ease-out);
+}
+.oss-panel::before {
+  content: "";
+  position: absolute;
+  z-index: 0;
+  inset: -12%;
+  pointer-events: none;
+  background:
+    radial-gradient(
+      circle at var(--oss-pointer-x) var(--oss-pointer-y),
+      rgba(255, 255, 255, 0.1) 0,
+      rgba(255, 197, 49, 0.12) 16%,
+      transparent 38%
+    ),
+    linear-gradient(135deg, var(--violet) 8%, var(--coral) 88%);
+  transform: scale(1.02);
+  transition: transform 600ms var(--ease-spring);
+}
+.oss-panel > * {
+  position: relative;
+  z-index: 1;
+}
+.oss-panel.oss-tracking {
+  box-shadow: 0 48px 80px -34px rgba(255, 90, 122, 0.68);
+  transition:
+    transform 180ms var(--ease-out),
+    border-radius 240ms var(--ease-out),
+    box-shadow 300ms var(--ease-out);
+}
+.oss-panel.oss-tracking::before {
+  transform: scale(1.12);
+  transition-duration: 350ms;
 }
 .oss-panel h2 {
   color: #fff;

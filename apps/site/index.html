@@ -60,12 +60,14 @@
         --ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
         --ease-spring: cubic-bezier(0.34, 1.3, 0.64, 1);
       }
+
       * {
         box-sizing: border-box;
         margin: 0;
       }
     </style>
   </head>
+
   <body>
     <div class="blob blob-a" aria-hidden="true"></div>
     <div class="blob blob-b" aria-hidden="true"></div>
@@ -588,7 +590,7 @@
                 <div class="msg">
                   <div class="av s">🦦</div>
                   <div class="body">
-                    <div><span class="who">sam</span><span class="when">11:02 AM</span></div>
+                    <div><span class="who">Bruno</span><span class="when">11:02 AM</span></div>
                     <div class="text">
                       hey team 🙏 help me pick a vibe real quick — like 30 seconds?
                       <a href="#">https://three-bouncy-otters.trycloudflare.com</a>
@@ -602,13 +604,13 @@
                 <div class="msg">
                   <div class="av a">🎧</div>
                   <div class="body">
-                    <div><span class="who">alex</span><span class="when">11:04 AM</span></div>
+                    <div><span class="who">Pedro</span><span class="when">11:04 AM</span></div>
                     <div class="text">voted! I loved the pink one!</div>
                   </div>
                 </div>
                 <div class="typing">
                   <span class="dots"><span></span><span></span><span></span></span>
-                  priya is typing…
+                  Cátia is typing…
                 </div>
               </div>
             </div>
@@ -1218,6 +1220,65 @@
     </script>
 
     <script>
+      /* ---------- OSS panel pointer pull ---------- */
+      ;(() => {
+        const panel = document.querySelector(".oss-panel")
+        const supportsMotion = window.matchMedia(
+          "(hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference)"
+        ).matches
+        if (!panel || !supportsMotion) return
+
+        let bounds
+        let frame = 0
+        let pointer
+
+        panel.addEventListener("pointerenter", event => {
+          bounds = panel.getBoundingClientRect()
+          pointer = event
+          panel.classList.add("oss-tracking")
+        })
+
+        panel.addEventListener("pointermove", event => {
+          pointer = event
+          if (frame) return
+          frame = requestAnimationFrame(() => {
+            frame = 0
+            const x = Math.max(0, Math.min(1, (pointer.clientX - bounds.left) / bounds.width))
+            const y = Math.max(0, Math.min(1, (pointer.clientY - bounds.top) / bounds.height))
+            const horizontal = x - 0.5
+            const vertical = y - 0.5
+
+            panel.style.setProperty("--oss-pointer-x", `${x * 100}%`)
+            panel.style.setProperty("--oss-pointer-y", `${y * 100}%`)
+            panel.style.setProperty("--oss-pull-x", `${horizontal * 8}px`)
+            panel.style.setProperty("--oss-pull-y", `${vertical * 6}px`)
+            panel.style.setProperty("--oss-tilt-x", `${vertical * -1.4}deg`)
+            panel.style.setProperty("--oss-tilt-y", `${horizontal * 1.8}deg`)
+            panel.style.setProperty(
+              "--oss-radius",
+              `${30 + (1 - x) * 5}px ${30 + x * 5}px ${30 + y * 5}px ${30 + (1 - y) * 5}px`
+            )
+          })
+        })
+
+        panel.addEventListener("pointerleave", () => {
+          if (frame) cancelAnimationFrame(frame)
+          frame = 0
+          panel.classList.remove("oss-tracking")
+          for (const property of [
+            "--oss-pointer-x",
+            "--oss-pointer-y",
+            "--oss-pull-x",
+            "--oss-pull-y",
+            "--oss-tilt-x",
+            "--oss-tilt-y",
+            "--oss-radius",
+          ]) {
+            panel.style.removeProperty(property)
+          }
+        })
+      })()
+
       /* ---------- scroll reveal ---------- */
       // Armed only here (never in CSS) so no-JS and reduced-motion visitors see everything.
       ;(() => {
