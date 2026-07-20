@@ -283,8 +283,7 @@ h1 {
 
 /* ---------- demo scene ---------- */
 /* The demo has two beats: a large centered console for startup and results, then a review
-   beat where it moves below-left as a live log. The browser and console never overlap,
-   so the Verdict controls remain clear throughout the transition. */
+   beat where it moves below-left as a live log and overlaps the browser's lower edge. */
 .scene {
   position: relative;
   max-width: 820px;
@@ -490,10 +489,10 @@ h1 {
     left 650ms var(--ease-in-out),
     top 650ms var(--ease-in-out);
 }
-/* During voting the console becomes a separate live log below the browser. */
+/* During voting the console becomes a separate live log over the browser's lower edge. */
 .scene.review .terminal {
   left: 16px;
-  top: 454px;
+  top: 375px;
   width: min(460px, calc(100% - 32px));
   transform: rotate(-1.2deg);
 }
@@ -594,12 +593,15 @@ h1 {
   .terminal {
     position: relative;
     left: auto;
-    top: auto;
+    top: -75px;
     width: 100%;
     margin-top: 18px;
     transform: rotate(-1.2deg);
+    transition: none;
   }
   .scene.review .terminal {
+    left: auto;
+    top: -75px;
     width: 100%;
     transform: rotate(-1.2deg);
   }
