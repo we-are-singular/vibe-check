@@ -1,6 +1,6 @@
 {
   "name": "@we-are-singular/vibe-check",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Share feedback on static HTML and Markdown alternatives with an agent, team, or wider group.",
   "keywords": [
     "cli",
