@@ -13,7 +13,7 @@ vi.mock("clipanion", () => ({
 
 import { VibeCheckCommand } from "../src/vibe-check-command.js"
 
-class TinderResultsCommand extends VibeCheckCommand {
+class LoveResultsCommand extends VibeCheckCommand {
   async execute(): Promise<number> {
     await this.output({
       hint: "Vibe Check stopped.",
@@ -25,8 +25,8 @@ class TinderResultsCommand extends VibeCheckCommand {
 }
 
 describe("VibeCheckCommand", () => {
-  it("labels the Tinder keep total as including Loves", async () => {
-    const command = new TinderResultsCommand()
+  it("labels the Love keep total as including Loves", async () => {
+    const command = new LoveResultsCommand()
     const stdout = new PassThrough()
     let output = ""
     stdout.on("data", chunk => {

@@ -57,7 +57,7 @@ export function VotingControls({
     )
   }
 
-  const selectedVote = feedback?.kind === "tinder" ? feedback.vote : undefined
+  const selectedVote = feedback?.kind === "love" ? feedback.vote : undefined
   return (
     <div aria-busy={isSaving} aria-label="Verdict" className="voting-controls" role="group">
       <VerdictButton isSaving={isSaving} onFeedback={onFeedback} selectedVote={selectedVote} vote="pass">
@@ -107,7 +107,7 @@ function VerdictButton({
       className={`vote-button ${vote === "love" ? "vote-button-love" : ""} ${classes[vote]}`}
       data-selected={selectedVote === vote || undefined}
       disabled={isSaving}
-      onClick={() => onFeedback({ kind: "tinder", vote })}
+      onClick={() => onFeedback({ kind: "love", vote })}
       type="button"
     >
       {children}

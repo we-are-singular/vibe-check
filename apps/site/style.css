@@ -1584,7 +1584,7 @@ footer {
   }
 }
 
-/* tinder panel: three cards cycle through keep → love → pass. 9s loop; each card
+/* love panel: three cards cycle through keep → love → pass. 9s loop; each card
    enters, its verdict button presses, a stamp lands, and it swipes off. */
 .t-demo {
   flex: 1;
@@ -1679,34 +1679,34 @@ footer {
   font-size: 12px;
   --dx: 18px;
 }
-.panel-tinder.active .t-card-1 {
+.panel-love.active .t-card-1 {
   animation: t-card-1 9s var(--ease-in-out) infinite;
 }
-.panel-tinder.active .t-card-2 {
+.panel-love.active .t-card-2 {
   animation: t-card-2 9s var(--ease-in-out) infinite;
 }
-.panel-tinder.active .t-card-3 {
+.panel-love.active .t-card-3 {
   animation: t-card-3 9s var(--ease-in-out) infinite;
 }
-.panel-tinder.active .v-keep {
+.panel-love.active .v-keep {
   animation: t-press-keep 9s linear infinite;
 }
-.panel-tinder.active .v-love {
+.panel-love.active .v-love {
   animation: t-press-love 9s linear infinite;
 }
-.panel-tinder.active .v-pass {
+.panel-love.active .v-pass {
   animation: t-press-pass 9s linear infinite;
 }
-.panel-tinder.active .st-keep {
+.panel-love.active .st-keep {
   animation: st-keep 9s var(--ease-out) infinite;
 }
-.panel-tinder.active .st-love {
+.panel-love.active .st-love {
   animation: st-love 9s var(--ease-out) infinite;
 }
-.panel-tinder.active .st-pass {
+.panel-love.active .st-pass {
   animation: st-pass 9s var(--ease-out) infinite;
 }
-.panel-tinder.active .hf {
+.panel-love.active .hf {
   animation: t-heart 9s linear infinite;
 }
 @keyframes t-card-1 {

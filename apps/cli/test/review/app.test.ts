@@ -7,7 +7,7 @@ import { createReviewApp } from "../../src/review/app.js"
 import type { ViewerAssetSource } from "../../src/review/viewer-assets.js"
 import type { VotingSystem } from "../../src/types.js"
 
-function createTestApp(votingSystem: VotingSystem = "tinder", viewerAssetsOverride?: ViewerAssetSource) {
+function createTestApp(votingSystem: VotingSystem = "love", viewerAssetsOverride?: ViewerAssetSource) {
   const campaign = {
     directory: "/campaign",
     title: "Which draft should we ship?",
@@ -78,7 +78,7 @@ describe("createReviewApp", () => {
     await expect(campaign.json()).resolves.toMatchObject({
       title: "Which draft should we ship?",
       vibes: [{ kind: "html" }, { kind: "markdown" }],
-      votingSystem: "tinder",
+      votingSystem: "love",
     })
 
     const asset = await app.request("/viewer-assets/app.js")
@@ -94,7 +94,7 @@ describe("createReviewApp", () => {
     expect(previewHtml).toContain("<h1>Markdown candidate</h1><p>Safe prose.</p>")
   })
 
-  it("preserves default Tinder results while allowing a changed verdict", async () => {
+  it("preserves default Love results while allowing a changed verdict", async () => {
     const app = createTestApp()
     const session = await createSession(app)
 
@@ -108,9 +108,9 @@ describe("createReviewApp", () => {
     })
 
     for (const [vibeId, feedback] of [
-      ["html-vibe", { kind: "tinder", vote: "love" }],
-      ["html-vibe", { kind: "tinder", vote: "keep" }],
-      ["markdown-vibe", { kind: "tinder", vote: "keep" }],
+      ["html-vibe", { kind: "love", vote: "love" }],
+      ["html-vibe", { kind: "love", vote: "keep" }],
+      ["markdown-vibe", { kind: "love", vote: "keep" }],
     ] as const) {
       const response = await app.request("/api/feedback", {
         body: JSON.stringify({ feedback, sessionId: session.sessionId, vibeId }),
@@ -243,7 +243,7 @@ describe("createReviewApp", () => {
   })
 
   it("keeps viewer asset failures separate from malformed request JSON", async () => {
-    const app = createTestApp("tinder", {
+    const app = createTestApp("love", {
       async asset() {
         throw new SyntaxError("manifest is malformed")
       },

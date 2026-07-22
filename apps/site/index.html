@@ -268,14 +268,14 @@
               class="showcase-item active"
               type="button"
               role="tab"
-              id="tab-tinder"
-              aria-controls="panel-tinder"
+              id="tab-love"
+              aria-controls="panel-love"
               aria-selected="true"
-              data-voting="tinder"
+              data-voting="love"
             >
               <span class="glyph c">♥</span>
               <span class="showcase-copy">
-                <strong>tinder <code>default</code></strong>
+                <strong>love <code>default</code></strong>
                 <span>Pass, Keep, or Love — fast triage.</span>
               </span>
               <span class="bar" aria-hidden="true"><span></span></span>
@@ -317,14 +317,14 @@
           <div class="showcase-browser">
             <div class="browser-bar">
               <div class="lights" aria-hidden="true"><span></span><span></span><span></span></div>
-              <span class="url mono" id="showcase-url">127.0.0.1:4173 · --voting tinder</span>
+              <span class="url mono" id="showcase-url">127.0.0.1:4173 · --voting love</span>
             </div>
             <div class="showcase-panels">
               <div
-                class="showcase-panel panel-tinder active"
-                id="panel-tinder"
+                class="showcase-panel panel-love active"
+                id="panel-love"
                 role="tabpanel"
-                aria-labelledby="tab-tinder"
+                aria-labelledby="tab-love"
               >
                 <div class="stage-top">
                   <span class="stage-label">Which hero wins?</span>
@@ -442,7 +442,7 @@
                bottom-right corner, half in the window, half on the page. Real extruded
                meshes when three.js loads (module at the end of body); the layered-SVG
                coin is the no-JS / no-WebGL fallback. `.on` mirrors the active panel. -->
-          <div class="obj-zone obj-tinder on" aria-hidden="true">
+          <div class="obj-zone obj-love on" aria-hidden="true">
             <div class="obj-shadow"></div>
             <div class="obj-float">
               <div class="obj-tilt">
@@ -680,9 +680,9 @@
             </thead>
             <tbody>
               <tr>
-                <td><code>--voting tinder|stars|comment</code></td>
+                <td><code>--voting love|stars|comment</code></td>
                 <td><code>--vote</code></td>
-                <td>Choose the feedback mechanic. Default: <code>tinder</code>.</td>
+                <td>Choose the feedback mechanic. Default: <code>love</code>.</td>
               </tr>
               <tr>
                 <td><code>--name "Which hero wins?"</code></td>

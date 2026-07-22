@@ -18,13 +18,13 @@
 
 ## Voting systems
 
-- `tinder` (default): Pass / Keep / Love. Love counts as a Keep plus a Love. Summary sorts by Loves, then Keeps.
+- `love` (default): Pass / Keep / Love. Love counts as a Keep plus a Love. Summary sorts by Loves, then Keeps.
 - `stars`: 1–5 stars per candidate. Summary ranks by average rating, then rating count.
 - `comment`: optional written feedback per candidate. Summary reports counts and lists comments; no ranking.
 
 ## Key options
 
-- `--voting tinder|stars|comment` (alias `--vote`): pick the feedback mechanic
+- `--voting love|stars|comment` (alias `--vote`): pick the feedback mechanic
 - `--name "question"` (alias `-n`): title the campaign
 - `--port 4214` (alias `-p`): change the loopback port
 - `--tunnel cloudflare|ngrok` (alias `-t`): temporary public review link

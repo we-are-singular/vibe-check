@@ -37,7 +37,7 @@ export const VOTE_VALUES = ["pass", "keep", "love"] as const
 export type Vote = (typeof VOTE_VALUES)[number]
 
 /** Feedback mechanics selectable when a Campaign is opened. */
-export const VOTING_SYSTEM_VALUES = ["tinder", "stars", "comment"] as const
+export const VOTING_SYSTEM_VALUES = ["love", "stars", "comment"] as const
 export type VotingSystem = (typeof VOTING_SYSTEM_VALUES)[number]
 
 export const STAR_RATINGS = [1, 2, 3, 4, 5] as const
@@ -45,7 +45,7 @@ export type StarRating = (typeof STAR_RATINGS)[number]
 
 /** One completed Vibe response, shaped by the Campaign's selected voting system. */
 export type Feedback =
-  | { kind: "tinder"; vote: Vote }
+  | { kind: "love"; vote: Vote }
   | { kind: "stars"; rating: StarRating }
   | { comment: string; kind: "comment" }
 
@@ -53,7 +53,7 @@ export type Feedback =
 export function isFeedbackForVotingSystem(value: unknown, votingSystem: VotingSystem): value is Feedback {
   if (!isRecord(value) || value.kind !== votingSystem) return false
 
-  if (value.kind === "tinder") return typeof value.vote === "string" && VOTE_VALUES.includes(value.vote as Vote)
+  if (value.kind === "love") return typeof value.vote === "string" && VOTE_VALUES.includes(value.vote as Vote)
   if (value.kind === "stars")
     return typeof value.rating === "number" && STAR_RATINGS.includes(value.rating as StarRating)
   return typeof value.comment === "string"
@@ -66,8 +66,8 @@ export type SessionSnapshot = {
   sessionId: string
 }
 
-/** Legacy aggregate result, kept compatible with the default Tinder output. */
-export type TinderResultRow = {
+/** Legacy aggregate result, kept compatible with the default Love output. */
+export type LoveResultRow = {
   file: string
   id: string
   keepCount: number
@@ -100,7 +100,7 @@ export type CommentLog = {
 }
 
 /** Aggregate Campaign result, ranked according to the selected voting system. */
-export type ResultRow = TinderResultRow | StarResultRow | CommentResultRow
+export type ResultRow = LoveResultRow | StarResultRow | CommentResultRow
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value)

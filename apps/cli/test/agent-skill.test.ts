@@ -16,7 +16,7 @@ describe("AgentSkill", () => {
     expect(contents).toContain("--vote stars")
     expect(contents).toContain("--voting comment")
     expect(contents).toContain("## Choose a voting system")
-    expect(contents).toContain("### `tinder` — fast triage")
+    expect(contents).toContain("### `love` — fast triage")
     expect(contents).toContain("### `stars` — relative ranking")
     expect(contents).toContain("### `comment` — qualitative feedback")
     expect(contents).toContain("--vote stars")

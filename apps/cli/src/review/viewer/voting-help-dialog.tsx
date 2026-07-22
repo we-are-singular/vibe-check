@@ -68,7 +68,7 @@ function getVotingGuidance(votingSystem: VotingSystem): {
   title: string
 } {
   switch (votingSystem) {
-    case "tinder":
+    case "love":
       return {
         description: "Use the call that best matches your reaction. Choosing one takes you to the next Vibe.",
         points: [

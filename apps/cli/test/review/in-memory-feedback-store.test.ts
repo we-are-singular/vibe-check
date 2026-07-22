@@ -22,16 +22,16 @@ const vibes = [
 ] as const
 
 describe("InMemoryFeedbackStore", () => {
-  it("counts Tinder feedback and replaces a changed opinion", async () => {
+  it("counts Love feedback and replaces a changed opinion", async () => {
     const store = new InMemoryFeedbackStore(vibes)
     const loveSession = store.createOrResume()
     const keepSession = store.createOrResume()
     const passSession = store.createOrResume()
 
-    await store.recordFeedback(loveSession.sessionId, "first", { kind: "tinder", vote: "love" })
-    await store.recordFeedback(keepSession.sessionId, "first", { kind: "tinder", vote: "keep" })
-    await store.recordFeedback(passSession.sessionId, "first", { kind: "tinder", vote: "pass" })
-    await store.recordFeedback(loveSession.sessionId, "first", { kind: "tinder", vote: "pass" })
+    await store.recordFeedback(loveSession.sessionId, "first", { kind: "love", vote: "love" })
+    await store.recordFeedback(keepSession.sessionId, "first", { kind: "love", vote: "keep" })
+    await store.recordFeedback(passSession.sessionId, "first", { kind: "love", vote: "pass" })
+    await store.recordFeedback(loveSession.sessionId, "first", { kind: "love", vote: "pass" })
 
     expect(store.results().find(result => result.id === "first")).toMatchObject({
       keepCount: 1,
@@ -95,14 +95,14 @@ describe("InMemoryFeedbackStore", () => {
     const store = new InMemoryFeedbackStore(vibes, { recordAcceptedFeedback })
     const session = store.createOrResume()
 
-    await store.recordFeedback(session.sessionId, "first", { kind: "tinder", vote: "love" })
-    await store.recordFeedback(session.sessionId, "first", { kind: "tinder", vote: "love" })
-    await store.recordFeedback(session.sessionId, "first", { kind: "tinder", vote: "keep" })
+    await store.recordFeedback(session.sessionId, "first", { kind: "love", vote: "love" })
+    await store.recordFeedback(session.sessionId, "first", { kind: "love", vote: "love" })
+    await store.recordFeedback(session.sessionId, "first", { kind: "love", vote: "keep" })
 
     expect(recordAcceptedFeedback).toHaveBeenCalledTimes(2)
     expect(recordAcceptedFeedback).toHaveBeenLastCalledWith({
       eventId: `${session.sessionId}:first:2`,
-      feedback: { kind: "tinder", vote: "keep" },
+      feedback: { kind: "love", vote: "keep" },
       sessionId: session.sessionId,
       vibe: { file: "first.html", id: "first", label: "First" },
     })
@@ -112,7 +112,7 @@ describe("InMemoryFeedbackStore", () => {
     const uncommittedSession = uncommittedStore.createOrResume()
 
     await expect(
-      uncommittedStore.recordFeedback(uncommittedSession.sessionId, "first", { kind: "tinder", vote: "keep" })
+      uncommittedStore.recordFeedback(uncommittedSession.sessionId, "first", { kind: "love", vote: "keep" })
     ).rejects.toThrow("disk full")
     expect(uncommittedStore.getSession(uncommittedSession.sessionId).feedback).toEqual({})
   })
