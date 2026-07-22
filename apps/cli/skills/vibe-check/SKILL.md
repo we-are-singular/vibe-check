@@ -65,7 +65,7 @@ npm install -g @we-are-singular/vibe-check
 vibe-check serve ./candidate-variants
 ```
 
-Open the printed review URL in a browser. Each browser session reviews one candidate at a time and can return with icon-only **Previous** or **Next** controls to change earlier feedback. Tinder verdicts advance automatically; reaching the end shows a thank-you screen even when some candidates are unanswered. Completed sessions reopen on the thank-you screen, where **Review my responses** reopens the first candidate and its earlier feedback remains editable. Aggregate feedback is available in the creator's final CLI summary.
+Open the printed review URL in a browser. Each browser session reviews one candidate at a time and can return with icon-only **Previous** or **Next** controls to change earlier feedback. Love verdicts advance automatically; reaching the end shows a thank-you screen even when some candidates are unanswered. Completed sessions reopen on the thank-you screen, where **Review my responses** reopens the first candidate and its earlier feedback remains editable. Aggregate feedback is available in the creator's final CLI summary.
 
 The question-mark button explains the current voting system in the review UI.
 
@@ -80,7 +80,7 @@ vibe-check serve ./candidate-variants --name "Which direction should we ship?"
 vibe-check serve ./candidate-variants -n "Choose the strongest proposal"
 ```
 
-### `tinder` — fast triage
+### `love` — fast triage
 
 Use the default system for a broad set of design directions or early-stage ideas where reviewers should quickly decide whether to discard, retain, or strongly endorse each option.
 
@@ -91,7 +91,7 @@ Use the default system for a broad set of design directions or early-stage ideas
 
 ```bash
 # Quickly narrow a set of visual directions.
-vibe-check serve ./candidate-variants --voting tinder
+vibe-check serve ./candidate-variants --voting love
 ```
 
 ### `stars` — relative ranking
@@ -134,7 +134,7 @@ The caller can instead capture the process streams directly:
 vibe-check serve ./candidate-variants --json > vibe-check.log 2>&1
 ```
 
-With `--json`, default Tinder feedback emits a `type: "vote"` event with `eventId`, `sessionId`, `vibe`, and `vote`. Star ratings and comments emit `type: "feedback"` with `eventId`, `sessionId`, `vibe`, and a `feedback` object. Reviewers may revise feedback; derive partial state by retaining the latest event for each `(sessionId, vibe.id)` pair. `--json --output` writes those events as JSON Lines; without `--json`, `--output` writes the same lifecycle information as human-readable text. An output file records each accepted feedback event once if CLI emission retries. Human-readable output uses `[sessionId] [filename] message` records and appends submitted comments after the final results table.
+With `--json`, default Love feedback emits a `type: "vote"` event with `eventId`, `sessionId`, `vibe`, and `vote`. Star ratings and comments emit `type: "feedback"` with `eventId`, `sessionId`, `vibe`, and a `feedback` object. Reviewers may revise feedback; derive partial state by retaining the latest event for each `(sessionId, vibe.id)` pair. `--json --output` writes those events as JSON Lines; without `--json`, `--output` writes the same lifecycle information as human-readable text. An output file records each accepted feedback event once if CLI emission retries. Human-readable output uses `[sessionId] [filename] message` records and appends submitted comments after the final results table.
 
 ## Review flow
 

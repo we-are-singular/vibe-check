@@ -20,16 +20,16 @@ export class ServeCommand extends VibeCheckCommand {
 
       Voting systems
 
-      \`tinder\` (default): Fast triage for a broad set of candidates. Reviewers choose Pass, Keep, or Love; results rank Loves, then Keeps.
+      \`love\` (default): Fast triage for a broad set of candidates. Reviewers choose Pass, Keep, or Love; results rank Loves, then Keeps.
 
       \`stars\`: Relative ranking for a small set of alternatives when the average strength of preference matters. Reviewers choose one to five stars; results rank average rating.
 
       \`comment\`: Qualitative feedback for copy, proposals, or work that needs explanation rather than a forced rank. Reviewers can submit text or continue without a response; results report comment counts and the final summary lists submitted comments.
 
-      Select a system with \`--voting <tinder|stars|comment>\` or \`--vote <system>\`. Every system permits unanswered candidates; reviewers can revisit and change recorded feedback before the session ends.
+      Select a system with \`--voting <love|stars|comment>\` or \`--vote <system>\`. Every system permits unanswered candidates; reviewers can revisit and change recorded feedback before the session ends.
     `,
     examples: [
-      ["Start a default Tinder triage", "vibe-check serve ./candidate-variants --voting tinder"],
+      ["Start a default Love triage", "vibe-check serve ./candidate-variants --voting love"],
       ["Rank close alternatives with stars", "vibe-check serve ./candidate-variants --vote stars"],
       ["Collect qualitative written feedback", "vibe-check serve ./candidate-variants --voting comment"],
       ["Use another port", "vibe-check serve ./candidate-variants --port 4214"],
@@ -64,7 +64,7 @@ export class ServeCommand extends VibeCheckCommand {
   })
 
   voting = Option.String("--voting,--vote", {
-    description: `Feedback mechanic (${VOTING_SYSTEM_VALUES.join(", ")}; default: tinder)`,
+    description: `Feedback mechanic (${VOTING_SYSTEM_VALUES.join(", ")}; default: love)`,
     required: false,
   })
 
@@ -103,7 +103,7 @@ export class ServeCommand extends VibeCheckCommand {
 
       const votingSystem =
         VOTING_SYSTEM_VALUES.find(system => system === this.voting) ??
-        (this.voting === undefined ? "tinder" : undefined)
+        (this.voting === undefined ? "love" : undefined)
       if (votingSystem === undefined) {
         await this.output({ type: "error", message: `--voting must be one of: ${VOTING_SYSTEM_VALUES.join(", ")}.` })
         return 1
@@ -123,7 +123,7 @@ export class ServeCommand extends VibeCheckCommand {
       )
       const feedbackStore = new InMemoryFeedbackStore(campaign.vibes, {
         recordAcceptedFeedback: feedback => {
-          if (feedback.feedback.kind === "tinder") {
+          if (feedback.feedback.kind === "love") {
             return this.output({
               eventId: feedback.eventId,
               sessionId: feedback.sessionId,

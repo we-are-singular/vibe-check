@@ -7,7 +7,7 @@ import type {
   ResultRow,
   SessionSnapshot,
   StarResultRow,
-  TinderResultRow,
+  LoveResultRow,
   VotingSystem,
 } from "../types.js"
 import { isFeedbackForVotingSystem } from "../types.js"
@@ -39,7 +39,7 @@ export class InMemoryFeedbackStore {
 
   constructor(
     private readonly vibes: readonly RenderedVibe[],
-    { recordAcceptedFeedback, votingSystem = "tinder" }: InMemoryFeedbackStoreOptions = {}
+    { recordAcceptedFeedback, votingSystem = "love" }: InMemoryFeedbackStoreOptions = {}
   ) {
     this.recordAcceptedFeedback = recordAcceptedFeedback
     this.votingSystem = votingSystem
@@ -138,8 +138,8 @@ export class InMemoryFeedbackStore {
 
   results(): readonly ResultRow[] {
     switch (this.votingSystem) {
-      case "tinder":
-        return this.vibes.map(vibe => this.tinderResult(vibe)).sort(compareTinderResultRows)
+      case "love":
+        return this.vibes.map(vibe => this.loveResult(vibe)).sort(compareLoveResultRows)
       case "stars":
         return this.vibes.map(vibe => this.starResult(vibe)).sort(compareStarResultRows)
       case "comment":
@@ -147,13 +147,13 @@ export class InMemoryFeedbackStore {
     }
   }
 
-  private tinderResult(vibe: RenderedVibe): TinderResultRow {
+  private loveResult(vibe: RenderedVibe): LoveResultRow {
     let keepCount = 0
     let loveCount = 0
 
     for (const feedback of this.feedbackBySession.values()) {
       const response = feedback.get(vibe.id)
-      if (response?.kind !== "tinder") continue
+      if (response?.kind !== "love") continue
       if (response.vote === "keep" || response.vote === "love") keepCount += 1
       if (response.vote === "love") loveCount += 1
     }
@@ -213,13 +213,13 @@ function toSnapshot(sessionId: string, feedback: ReadonlyMap<string, Feedback>, 
 
 function feedbackEqual(left: Feedback | undefined, right: Feedback): boolean {
   if (!left || left.kind !== right.kind) return false
-  if (left.kind === "tinder" && right.kind === "tinder") return left.vote === right.vote
+  if (left.kind === "love" && right.kind === "love") return left.vote === right.vote
   if (left.kind === "stars" && right.kind === "stars") return left.rating === right.rating
   return left.kind === "comment" && right.kind === "comment" && left.comment === right.comment
 }
 
-// Rank aggregate Tinder results by Loves, then Keeps, with lexical tie-breaks for stable output.
-function compareTinderResultRows(left: TinderResultRow, right: TinderResultRow): number {
+// Rank aggregate Love results by Loves, then Keeps, with lexical tie-breaks for stable output.
+function compareLoveResultRows(left: LoveResultRow, right: LoveResultRow): number {
   if (left.loveCount !== right.loveCount) return right.loveCount - left.loveCount
   if (left.keepCount !== right.keepCount) return right.keepCount - left.keepCount
   return compareVibes(left, right)

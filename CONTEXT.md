@@ -25,10 +25,10 @@ A human who judges the Vibes in a Campaign.
 One Voter's attempt to review one Campaign.
 
 **Voting System**:
-The feedback mechanic selected by the Creator when opening a Campaign: `tinder` (the default), `stars`, or `comment`.
+The feedback mechanic selected by the Creator when opening a Campaign: `love` (the default), `stars`, or `comment`.
 
 **Verdict**:
-For the `tinder` Voting System only: `pass`, `keep`, or `love`. `love` is the stronger positive **I love it** signal: it counts as a keep and adds a Love.
+For the `love` Voting System only: `pass`, `keep`, or `love`. `love` is the stronger positive **I love it** signal: it counts as a keep and adds a Love.
 
 **Star Rating**:
 For the `stars` Voting System only: one to five stars expressing a Voter's relative ranking of one Vibe.
@@ -40,7 +40,7 @@ For the `comment` Voting System only: optional written feedback on one Vibe. A V
 An optional Voter response for one Vibe, using the Campaign's Voting System. A Voter can leave any Vibe unanswered.
 
 **Campaign Result**:
-The aggregate result derived from recorded Voter Session Feedback. Tinder Campaigns sort by Loves then Keeps; star Campaigns sort by average rating; comment Campaigns report comment counts without a ranking.
+The aggregate result derived from recorded Voter Session Feedback. Love Campaigns sort by Loves then Keeps; star Campaigns sort by average rating; comment Campaigns report comment counts without a ranking.
 
 ## Relationships
 

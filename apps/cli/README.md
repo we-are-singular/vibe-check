@@ -37,7 +37,7 @@ Start a review session:
 vibe-check serve ./candidate-variants
 ```
 
-Open the printed review URL. It starts on your machine and can be shared with `--tunnel`. The default `tinder` mechanic offers **Pass**, **Keep**, and **Love**; selecting one advances to the next candidate. Use the icon-only **Previous** and **Next** controls to revisit candidates; previously recorded feedback stays selected and can be changed. Reaching the end shows a thank-you screen; the Campaign owner receives aggregate feedback in the final CLI session summary.
+Open the printed review URL. It starts on your machine and can be shared with `--tunnel`. The default `love` mechanic offers **Pass**, **Keep**, and **Love**; selecting one advances to the next candidate. Use the icon-only **Previous** and **Next** controls to revisit candidates; previously recorded feedback stays selected and can be changed. Reaching the end shows a thank-you screen; the Campaign owner receives aggregate feedback in the final CLI session summary.
 
 Feedback is scoped to the running session and stays in memory until the server stops. Completed sessions reopen on their thank-you screen; **Review my responses** replaces the progress label in the header and reopens the first candidate. Stop gracefully with `Ctrl+C` (SIGINT) or SIGTERM: Vibe Check writes the final summary and exits with status `0`. A forced termination such as SIGKILL cannot write that shutdown summary, but accepted feedback already emitted to an output capture remains available. Without `--output` or caller output capture, Vibe Check does not persist session data to a file.
 
@@ -62,7 +62,7 @@ vibe-check serve ./candidate-variants -n "Choose the strongest draft"
 
 ```bash
 # Default: Pass, Keep, or Love; the CLI summary ranks Loves, then Keeps.
-vibe-check serve ./candidate-variants --voting tinder
+vibe-check serve ./candidate-variants --voting love
 
 # One-to-five star ratings; the CLI summary ranks average rating.
 vibe-check serve ./candidate-variants --voting stars
@@ -100,7 +100,7 @@ The caller can instead capture the process streams directly:
 vibe-check serve ./candidate-variants --json > vibe-check.log 2>&1
 ```
 
-With `--json`, default Tinder feedback emits `type: "vote"` with `eventId`, `sessionId`, `vibe`, and `vote`. Star ratings and comments emit `type: "feedback"` with `eventId`, `sessionId`, `vibe`, and a `feedback` object. Reviewers may change their feedback; when replaying captured events, keep the latest event for each `(sessionId, vibe.id)` pair. An output file records each accepted feedback event once if CLI emission retries. In human-readable mode, accepted feedback uses `[sessionId] [filename] message` records; final comment summaries list each submitted comment after the results table. For Tinder summaries, **Kept or loved** includes every Keep and Love response.
+With `--json`, default Love feedback emits `type: "vote"` with `eventId`, `sessionId`, `vibe`, and `vote`. Star ratings and comments emit `type: "feedback"` with `eventId`, `sessionId`, `vibe`, and a `feedback` object. Reviewers may change their feedback; when replaying captured events, keep the latest event for each `(sessionId, vibe.id)` pair. An output file records each accepted feedback event once if CLI emission retries. In human-readable mode, accepted feedback uses `[sessionId] [filename] message` records; final comment summaries list each submitted comment after the results table. For Love summaries, **Kept or loved** includes every Keep and Love response.
 
 Share a temporary public review link through an installed tunnel provider:
 

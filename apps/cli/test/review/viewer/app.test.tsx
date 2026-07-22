@@ -8,13 +8,13 @@ import { ReviewApiClient, type Campaign, type ReviewSession } from "../../../src
 import type { Feedback } from "../../../src/types.js"
 import { ViewerApp } from "../../../src/review/viewer/app.js"
 
-const tinderCampaign: Campaign = {
+const loveCampaign: Campaign = {
   title: "Launch contenders",
   vibes: [
     { file: "aurora.html", id: "aurora", kind: "html", label: "Aurora" },
     { file: "beacon.html", id: "beacon", kind: "html", label: "Beacon" },
   ],
-  votingSystem: "tinder",
+  votingSystem: "love",
 }
 
 const localStorageValues = new Map<string, string>()
@@ -94,7 +94,7 @@ describe("ViewerApp", () => {
 
   it("renders a thank-you screen at the results route without starting another review", async () => {
     window.history.replaceState({}, "", "/results")
-    const api = new FakeReviewApiClient(tinderCampaign)
+    const api = new FakeReviewApiClient(loveCampaign)
 
     render(<ViewerApp api={api} />)
 
@@ -108,8 +108,8 @@ describe("ViewerApp", () => {
     )
     getHeaderGithubLink()
   })
-  it("advances after a Tinder verdict and preserves a revised opinion when returning", async () => {
-    const api = new FakeReviewApiClient(tinderCampaign)
+  it("advances after a Love verdict and preserves a revised opinion when returning", async () => {
+    const api = new FakeReviewApiClient(loveCampaign)
     const user = userEvent.setup()
 
     render(<ViewerApp api={api} />)
@@ -129,9 +129,9 @@ describe("ViewerApp", () => {
     await screen.findByRole("heading", { name: "Thanks for sharing your perspective." })
 
     expect(api.recordedFeedback).toEqual([
-      { feedback: { kind: "tinder", vote: "pass" }, sessionId: "session-1", vibeId: "aurora" },
-      { feedback: { kind: "tinder", vote: "love" }, sessionId: "session-1", vibeId: "aurora" },
-      { feedback: { kind: "tinder", vote: "keep" }, sessionId: "session-1", vibeId: "beacon" },
+      { feedback: { kind: "love", vote: "pass" }, sessionId: "session-1", vibeId: "aurora" },
+      { feedback: { kind: "love", vote: "love" }, sessionId: "session-1", vibeId: "aurora" },
+      { feedback: { kind: "love", vote: "keep" }, sessionId: "session-1", vibeId: "beacon" },
     ])
     expect(screen.getByText("npx skills add we-are-singular/vibe-check").textContent).toBe(
       "npx skills add we-are-singular/vibe-check"
@@ -169,7 +169,7 @@ describe("ViewerApp", () => {
   })
 
   it("auto-advances after a star rating and keeps its cumulative highlight when returning", async () => {
-    const campaign: Campaign = { ...tinderCampaign, votingSystem: "stars" }
+    const campaign: Campaign = { ...loveCampaign, votingSystem: "stars" }
     const api = new FakeReviewApiClient(campaign)
     const user = userEvent.setup()
 
@@ -187,7 +187,7 @@ describe("ViewerApp", () => {
 
   it("renders Markdown at full width regardless of the saved HTML preview preference", async () => {
     const markdownCampaign: Campaign = {
-      ...tinderCampaign,
+      ...loveCampaign,
       vibes: [
         { file: "aurora.md", id: "aurora", kind: "markdown", label: "Aurora" },
         { file: "beacon.md", id: "beacon", kind: "markdown", label: "Beacon" },
@@ -215,7 +215,7 @@ describe("ViewerApp", () => {
   })
 
   it("saves optional comments from Next and finishes after every Vibe", async () => {
-    const campaign: Campaign = { ...tinderCampaign, votingSystem: "comment" }
+    const campaign: Campaign = { ...loveCampaign, votingSystem: "comment" }
     const api = new FakeReviewApiClient(campaign)
     const user = userEvent.setup()
 
