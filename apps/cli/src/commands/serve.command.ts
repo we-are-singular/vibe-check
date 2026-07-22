@@ -102,8 +102,7 @@ export class ServeCommand extends VibeCheckCommand {
       }
 
       const votingSystem =
-        VOTING_SYSTEM_VALUES.find(system => system === this.voting) ??
-        (this.voting === undefined ? "love" : undefined)
+        VOTING_SYSTEM_VALUES.find(system => system === this.voting) ?? (this.voting === undefined ? "love" : undefined)
       if (votingSystem === undefined) {
         await this.output({ type: "error", message: `--voting must be one of: ${VOTING_SYSTEM_VALUES.join(", ")}.` })
         return 1
